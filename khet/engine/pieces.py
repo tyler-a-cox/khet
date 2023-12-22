@@ -82,6 +82,7 @@ class Scarab(GamePiece):
     def __init__(self, position, orientation, color):
         """ """
         super().__init__(position, orientation, color)
+        self.__name__ = "Scarab"
 
     def resolve_laser_interaction(self, side):
         """
@@ -105,6 +106,7 @@ class Anubis(GamePiece):
     def __init__(self, position, orientation, color):
         """ """
         super().__init__(position, orientation, color)
+        self.__name__ = "Anubis"
 
     def resolve_laser_interaction(self, side):
         """ """
@@ -118,6 +120,7 @@ class Sphinx(GamePiece):
     def __init__(self, position, orientation, color):
         """ """
         super().__init__(position, orientation, color)
+        self.__name__ = "Sphinx"
 
     def resolve_laser_interaction(self, side):
         """ """
@@ -151,6 +154,7 @@ class Pharaoh(GamePiece):
     def __init__(self, position, orientation, color):
         """ """
         super().__init__(position, orientation, color)
+        self.__name__ = "Pharaoh"
 
     def resolve_laser_interaction(self, side):
         """ """
@@ -165,3 +169,4 @@ class EyeOfHorus(GamePiece):
     def __init__(self, position, orientation, color):
         """ """
         super().__init__(position, orientation, color)
+        self.__name__ = "EyeOfHorus"
