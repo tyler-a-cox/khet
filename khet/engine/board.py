@@ -75,7 +75,6 @@ GAME_PIECES = {
     "scarab": Scarab,
     "anubis": Anubis,
     "sphinx": Sphinx,
-    "obelisk": Obelisk,
     "eyeofhorus": EyeOfHorus,
 }
 
