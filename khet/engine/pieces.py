@@ -2,6 +2,18 @@
 File for handling the pieces in the game
 """
 
+from khet.engine.exceptions import MovementError
+
+MOVEMENT_DICT = {
+    "up": (1, 0),
+    "down": (-1, 0),
+    "left": (0, -1),
+    "right": (0, 1),
+    "up-left": (1, -1),
+    "up-right": (1, 1),
+    "down-left": (-1, -1),
+    "down-right": (-1, 1),
+}
 
 class GamePiece:
     """
@@ -35,33 +47,19 @@ class GamePiece:
         """ """
         assert direction in ["up", "down", "left", "right"], "Invalid direction"
 
-        if direction == "up":
-            self.position[1] += 1
-        elif direction == "down":
-            self.position[1] -= 1
-        elif direction == "left":
-            self.position[0] -= 1
-        elif direction == "right":
-            self.position[0] += 1
-        elif direction == "up-left":
-            self.position[0] -= 1
-            self.position[1] += 1
-        elif direction == "up-right":
-            self.position[0] += 1
-            self.position[1] += 1
-        elif direction == "down-left":
-            self.position[0] -= 1
-            self.position[1] -= 1
-        elif direction == "down-right":
-            self.position[0] += 1
-            self.position[1] -= 1
+        # Dictionary for movement
+        upmove, rightmove = MOVEMENT_DICT[direction]
+
+        # Update positions
+        self.position[0] += upmove
+        self.position[1] += rightmove
 
     def is_valid_move(self, direction=None, rotation=None) -> None:
         """ """
         assert (
             direction is not None or rotation is not None
         ), "Must specify either direction or rotation"
-        # XXX: Add logic for
+        
         return True
 
 
@@ -125,6 +123,18 @@ class Sphinx(GamePiece):
         """ """
         # XXX: Add logic for
         return True
+
+    def move(self, direction) -> None:
+        """
+        Overwrite the move method to prevent the sphinx from moving
+        """
+        raise MovementError("Sphinx cannot move")
+
+    def rotate(self, rotation) -> None:
+        """
+        Overwrite the rotate method to prevent the sphinx from rotating invalidly
+        """
+        pass
 
     def is_valid_move(self, direction=None, rotation=None):
         """ """

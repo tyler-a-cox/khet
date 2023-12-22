@@ -21,27 +21,52 @@ from khet.engine.pieces import (
 
 GAME_MODES = {
     "classic": {
-        "pharaoh": 1,
-        "pyramid": 2,
-        "scarab": 2,
-        "anubis": 2,
-        "sphinx": 1,
+        "red": {
+            "pharaoh": [(0, 5)],
+            "pyramid": [(1, 2), (0, 7), (3, 0), (4, 0), (3, 7), (4, 7), (5, 6)],
+            "scarab": [(3, 4), (3, 5)],
+            "anubis": [(0, 4), (0, 6)],
+            "sphinx": [(0, 0)],
+        },
+        "silver": {
+            "pharaoh": 1,
+            "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
+            "scarab": [(4, 4), (4, 5)],
+            "anubis": [(0, 1), (0, 7)],
+            "sphinx": [(7, 9)],
+        },
     },
     "imhotep": {
-        "pharaoh": 1,
-        "pyramid": 2,
-        "scarab": 2,
-        "anubis": 2,
-        "sphinx": 1,
-        "eyeofhorus": 1,
+        "red": {
+            "pharaoh": 1,
+            "pyramid": 2,
+            "scarab": 2,
+            "anubis": 2,
+            "sphinx": 1,
+        },
+        "silver": {
+            "pharaoh": 1,
+            "pyramid": 2,
+            "scarab": 2,
+            "anubis": 2,
+            "sphinx": 1,
+        },
     },
     "dynasty": {
-        "pharaoh": 1,
-        "pyramid": 2,
-        "scarab": 2,
-        "anubis": 2,
-        "sphinx": 1,
-        "eyeofhorus": 1,
+        "red": {
+            "pharaoh": 1,
+            "pyramid": 2,
+            "scarab": 2,
+            "anubis": 2,
+            "sphinx": 1,
+        },
+        "silver": {
+            "pharaoh": 1,
+            "pyramid": 2,
+            "scarab": 2,
+            "anubis": 2,
+            "sphinx": 1,
+        },
     },
 }
 
@@ -68,17 +93,29 @@ class GameBoard:
 
         # Initialize the board
         self._populate_board(game_mode)
+        self._board = [[None for _ in range(8)] for _ in range(10)]
         self.active_pieces = {"red": [], "silver": []}
 
     def _populate_board(self, game_mode) -> None:
         """ """
         for color in ["red", "silver"]:
             for piece in GAME_PIECES:
-                self._add_piece(color, piece, None, None)
+                for position in GAME_MODES[game_mode][color][piece]:
+                    self._add_piece(color, piece, position, None)
 
     def _add_piece(self, color, piece, position, orientation) -> None:
         """ """
-        pass
+        assert piece in GAME_PIECES, "Invalid piece type"
+        assert color in ["red", "silver"], "Invalid color"
+
+        # Create the piece
+        new_piece = GAME_PIECES[piece](position, orientation, color)
+
+        # Add the piece to the board
+        self._board[position[0]][position[1]] = new_piece
+
+        # Add the piece to the active pieces
+        self.active_pieces[color].append(new_piece)
 
     def remove_piece(self, color, piece) -> None:
         """ """
