@@ -1,5 +1,13 @@
 """
 Module for handling the khet game board
+
+TODO:
+    - Add logic for the laser
+    - Add logic for moving game pieces on the board
+    - Add logic for resolving laser interactions
+    - Add logic for determining valid moves
+    - Add logic for determining valid rotations
+    - Add logic for obtaining a player's score for the board
 """
 from khet.engine.pieces import (
     Pharaoh,
