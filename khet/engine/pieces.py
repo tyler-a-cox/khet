@@ -101,19 +101,6 @@ class Scarab(GamePiece):
         return True
 
 
-class Obelisk(GamePiece):
-    """ """
-
-    def __init__(self, position, orientation, color):
-        """ """
-        super().__init__(position, orientation, color)
-
-    def resolve_laser_interaction(self, side):
-        """ """
-        # XXX: Add logic for
-        return True
-
-
 class Anubis(GamePiece):
     """ """
 

@@ -26,7 +26,6 @@ GAME_MODES = {
         "scarab": 2,
         "anubis": 2,
         "sphinx": 1,
-        "obelisk": 1,
     },
     "imhotep": {
         "pharaoh": 1,
@@ -34,7 +33,6 @@ GAME_MODES = {
         "scarab": 2,
         "anubis": 2,
         "sphinx": 1,
-        "obelisk": 1,
         "eyeofhorus": 1,
     },
     "dynasty": {
@@ -43,7 +41,6 @@ GAME_MODES = {
         "scarab": 2,
         "anubis": 2,
         "sphinx": 1,
-        "obelisk": 1,
         "eyeofhorus": 1,
     },
 }
