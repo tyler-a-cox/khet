@@ -18,53 +18,103 @@ from khet.engine.pieces import (
     EyeOfHorus,
 )
 
+# Setup positions and orientations for the different game pieces in each game modes
+# TODO: Consider moving this to a config file
 GAME_MODES = {
     "classic": {
         "red": {
-            "pharaoh": [(0, 5)],
-            "pyramid": [(1, 2), (0, 7), (3, 0), (4, 0), (3, 7), (4, 7), (5, 6)],
-            "scarab": [(3, 4), (3, 5)],
-            "anubis": [(0, 4), (0, 6)],
-            "sphinx": [(0, 0)],
+            "pharaoh": [((0, 5), 2)],
+            "pyramid": [
+                ((1, 2), 2),
+                ((0, 7), 1),
+                ((3, 0), 0),
+                ((4, 0), 1),
+                ((3, 7), 1),
+                ((4, 7), 0),
+                ((5, 6), 1),
+            ],
+            "scarab": [((3, 4), 3), ((3, 5), 0)],
+            "anubis": [((0, 4), 2), ((0, 6), 2)],
+            "sphinx": [((0, 0), 2)],
         },
         "silver": {
-            "pharaoh": [(7, 4)],
-            "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
-            "scarab": [(4, 4), (4, 5)],
-            "anubis": [(7, 3), (7, 5)],
-            "sphinx": [(7, 9)],
+            "pharaoh": [((7, 4), 0)],
+            "pyramid": [
+                ((7, 2), 3),
+                ((6, 7), 0),
+                ((3, 2), 2),
+                ((4, 2), 3),
+                ((3, 9), 3),
+                ((4, 9), 2),
+                ((2, 3), 3),
+            ],
+            "scarab": [((4, 4), 1), ((4, 5), 2)],
+            "anubis": [((7, 3), 0), ((7, 5), 0)],
+            "sphinx": [((7, 9), 0)],
         },
     },
     "imhotep": {
-         "red": {
-            "pharaoh": [(0, 5)],
-            "pyramid": [(1, 2), (0, 7), (3, 0), (4, 0), (3, 7), (4, 7), (5, 6)],
-            "scarab": [(3, 4), (3, 5)],
-            "anubis": [(0, 4), (0, 6)],
-            "sphinx": [(0, 0)],
+        "red": {
+            "pharaoh": [((0, 5), 2)],
+            "pyramid": [
+                ((1, 2), 2),
+                ((0, 7), 1),
+                ((3, 0), 0),
+                ((4, 0), 1),
+                ((3, 7), 1),
+                ((4, 7), 0),
+                ((5, 6), 1),
+            ],
+            "scarab": [((3, 4), 3), ((3, 5), 0)],
+            "anubis": [((0, 4), 2), ((0, 6), 2)],
+            "sphinx": [((0, 0), 2)],
         },
         "silver": {
-            "pharaoh": [(7, 4)],
-            "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
-            "scarab": [(4, 4), (4, 5)],
-            "anubis": [(0, 1), (0, 7)],
-            "sphinx": [(7, 9)],
+            "pharaoh": [((7, 4), 0)],
+            "pyramid": [
+                ((7, 2), 3),
+                ((6, 7), 0),
+                ((3, 2), 2),
+                ((4, 2), 3),
+                ((3, 9), 3),
+                ((4, 9), 2),
+                ((2, 3), 3),
+            ],
+            "scarab": [((4, 4), 1), ((4, 5), 2)],
+            "anubis": [((7, 3), 0), ((7, 5), 0)],
+            "sphinx": [((7, 9), 0)],
         },
     },
     "dynasty": {
-         "red": {
-            "pharaoh": [(0, 5)],
-            "pyramid": [(1, 2), (0, 7), (3, 0), (4, 0), (3, 7), (4, 7), (5, 6)],
-            "scarab": [(3, 4), (3, 5)],
-            "anubis": [(0, 4), (0, 6)],
-            "sphinx": [(0, 0)],
+        "red": {
+            "pharaoh": [((0, 5), 2)],
+            "pyramid": [
+                ((1, 2), 2),
+                ((0, 7), 1),
+                ((3, 0), 0),
+                ((4, 0), 1),
+                ((3, 7), 1),
+                ((4, 7), 0),
+                ((5, 6), 1),
+            ],
+            "scarab": [((3, 4), 3), ((3, 5), 0)],
+            "anubis": [((0, 4), 2), ((0, 6), 2)],
+            "sphinx": [((0, 0), 2)],
         },
         "silver": {
-            "pharaoh": [(7, 4)],
-            "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
-            "scarab": [(4, 4), (4, 5)],
-            "anubis": [(0, 1), (0, 7)],
-            "sphinx": [(7, 9)],
+            "pharaoh": [((7, 4), 0)],
+            "pyramid": [
+                ((7, 2), 3),
+                ((6, 7), 0),
+                ((3, 2), 2),
+                ((4, 2), 3),
+                ((3, 9), 3),
+                ((4, 9), 2),
+                ((2, 3), 3),
+            ],
+            "scarab": [((4, 4), 1), ((4, 5), 2)],
+            "anubis": [((7, 3), 0), ((7, 5), 0)],
+            "sphinx": [((7, 9), 0)],
         },
     },
 }
@@ -95,14 +145,15 @@ class GameBoard:
 
         # Populate the board
         self._populate_board(game_mode)
-        
 
     def _populate_board(self, game_mode) -> None:
         """ """
         for color in ["red", "silver"]:
             for piece in GAME_PIECES:
-                for position in GAME_MODES[game_mode][color].get(piece, []):
-                    self._add_piece(color, piece, position, None)
+                for position, orientation in GAME_MODES[game_mode][color].get(
+                    piece, []
+                ):
+                    self._add_piece(color, piece, position, orientation)
 
     def _add_piece(self, color, piece, position, orientation) -> None:
         """ """
