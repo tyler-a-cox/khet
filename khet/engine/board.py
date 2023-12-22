@@ -16,7 +16,6 @@ from khet.engine.pieces import (
     Anubis,
     Sphinx,
     EyeOfHorus,
-    Obelisk,
 )
 
 GAME_MODES = {
