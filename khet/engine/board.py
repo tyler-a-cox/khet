@@ -28,7 +28,7 @@ GAME_MODES = {
             "sphinx": [(0, 0)],
         },
         "silver": {
-            "pharaoh": 1,
+            "pharaoh": [(7, 4)],
             "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
             "scarab": [(4, 4), (4, 5)],
             "anubis": [(0, 1), (0, 7)],
@@ -36,35 +36,35 @@ GAME_MODES = {
         },
     },
     "imhotep": {
-        "red": {
-            "pharaoh": 1,
-            "pyramid": 2,
-            "scarab": 2,
-            "anubis": 2,
-            "sphinx": 1,
+         "red": {
+            "pharaoh": [(0, 5)],
+            "pyramid": [(1, 2), (0, 7), (3, 0), (4, 0), (3, 7), (4, 7), (5, 6)],
+            "scarab": [(3, 4), (3, 5)],
+            "anubis": [(0, 4), (0, 6)],
+            "sphinx": [(0, 0)],
         },
         "silver": {
-            "pharaoh": 1,
-            "pyramid": 2,
-            "scarab": 2,
-            "anubis": 2,
-            "sphinx": 1,
+            "pharaoh": [(7, 4)],
+            "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
+            "scarab": [(4, 4), (4, 5)],
+            "anubis": [(0, 1), (0, 7)],
+            "sphinx": [(7, 9)],
         },
     },
     "dynasty": {
-        "red": {
-            "pharaoh": 1,
-            "pyramid": 2,
-            "scarab": 2,
-            "anubis": 2,
-            "sphinx": 1,
+         "red": {
+            "pharaoh": [(0, 5)],
+            "pyramid": [(1, 2), (0, 7), (3, 0), (4, 0), (3, 7), (4, 7), (5, 6)],
+            "scarab": [(3, 4), (3, 5)],
+            "anubis": [(0, 4), (0, 6)],
+            "sphinx": [(0, 0)],
         },
         "silver": {
-            "pharaoh": 1,
-            "pyramid": 2,
-            "scarab": 2,
-            "anubis": 2,
-            "sphinx": 1,
+            "pharaoh": [(7, 4)],
+            "pyramid": [(7, 2), (6, 7), (3, 2), (4, 2), (3, 9), (4, 9), (2, 3)],
+            "scarab": [(4, 4), (4, 5)],
+            "anubis": [(0, 1), (0, 7)],
+            "sphinx": [(7, 9)],
         },
     },
 }
@@ -90,15 +90,18 @@ class GameBoard:
         self.game_mode = game_mode
 
         # Initialize the board
-        self._populate_board(game_mode)
         self._board = [[None for _ in range(8)] for _ in range(10)]
         self.active_pieces = {"red": [], "silver": []}
+
+        # Populate the board
+        self._populate_board(game_mode)
+        
 
     def _populate_board(self, game_mode) -> None:
         """ """
         for color in ["red", "silver"]:
             for piece in GAME_PIECES:
-                for position in GAME_MODES[game_mode][color][piece]:
+                for position in GAME_MODES[game_mode][color].get(piece, []):
                     self._add_piece(color, piece, position, None)
 
     def _add_piece(self, color, piece, position, orientation) -> None:
