@@ -204,14 +204,50 @@ class GameBoard:
         sphinx_position = sphinx.position
         sphinx_orientation = sphinx.orientation
 
-        laser_direction = None
-
         if sphinx_orientation == 0:
             # Fire the laser up
             laser_direction = "up"
         elif sphinx_orientation == 1:
             # Fire the laser left
             laser_direction = "left"
+        elif sphinx_orientation == 2:
+            # Fire the laser down
+            laser_direction = "down"
+        elif sphinx_orientation == 3:
+            # Fire the laser right
+            laser_direction = "right"
+
+        # Get the position of the laser
+        laser_position = sphinx_position
+
+        # Loop through the board until the laser hits a piece
+        # TODO: Consider moving this to a separate function
+        # TODO: Consider having a better stopping condition
+        # TODO: Consider having a better way to remove pieces
+        while (
+            laser_position[0] >= 0
+            and laser_position[0] < 8
+            and laser_position[1] >= 0
+            and laser_position[1] < 10
+            and laser_direction is not None
+        ):
+            laser_direction = None
+
+        # Check for a hit
+        for color in ["red", "silver"]:
+            removal_index = []
+            for pi, piece in enumerate(self.active_pieces[color]):
+                if not piece.is_active:
+                    removal_index.append(pi)
+
+            # Reverse the removal index list
+            removal_index = sorted(removal_index, reverse=True)
+
+            # Remove the pieces
+            for pi in removal_index:
+                pos_y, pos_x = self.active_pieces[color][pi].position
+                self._board[pos_y][pos_x] = None
+                self.active_pieces[color].pop(pi)
 
     def get_all_valid_moves(self, color) -> list:
         """

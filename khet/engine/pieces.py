@@ -190,8 +190,9 @@ class Sphinx(GamePiece):
         self.__name__ = "Sphinx"
 
     def resolve_laser_interaction(self, laser_direction):
-        """ """
-        pass
+        """
+        """
+        return
 
     def move(self, direction) -> None:
         """
@@ -212,7 +213,7 @@ class Sphinx(GamePiece):
         elif self.orientation == 2 and direction == "counterclockwise":
             self.orientation = 1
         else:
-            raise MovementError(f"{direction} rotation invalid for {self.color.upper()} Sphinx")
+            raise MovementError(f"{direction} rotation invalid for {self.color.capitalize()} Sphinx in orientation {self.orientation}")
         
     def is_valid_move(self, direction=None, rotation=None):
         """ """
@@ -231,10 +232,9 @@ class Pharaoh(GamePiece):
         super().__init__(position, orientation, color)
         self.__name__ = "Pharaoh"
 
-    def resolve_laser_interaction(self, side):
+    def resolve_laser_interaction(self, laser_direction):
         """ """
-        # XXX: Add logic for
-        return True
+        self.is_active = False
 
 
 # Expansion Pieces
