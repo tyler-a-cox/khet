@@ -90,7 +90,7 @@ class GameBoard:
         self.game_mode = game_mode
 
         # Initialize the board
-        self._board = [[None for _ in range(8)] for _ in range(10)]
+        self._board = [[None for _ in range(10)] for _ in range(8)]
         self.active_pieces = {"red": [], "silver": []}
 
         # Populate the board
