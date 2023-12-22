@@ -38,7 +38,7 @@ class GamePiece:
     def rotate(self, direction) -> None:
         """ """
         if direction not in ["clockwise", "counterclockwise"]:
-            raise MovementError("Invalid rotation direction")
+            raise MovementError(f"Invalid rotation direction: {direction}")
 
         if direction == "clockwise":
             self.orientation = (self.orientation + 1) % 4
