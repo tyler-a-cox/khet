@@ -69,6 +69,7 @@ class Pyramid(GamePiece):
     def __init__(self, position, orientation, color):
         """ """
         super().__init__(position, orientation, color)
+        self.__name__ = "Pyramid"
 
     def resolve_laser_interaction(self, side):
         """ """
