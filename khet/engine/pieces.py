@@ -33,10 +33,12 @@ class GamePiece:
         self.position = position
         self.orientation = orientation
         self.color = color
+        self.is_active = True
 
     def rotate(self, direction) -> None:
         """ """
-        assert direction in ["clockwise", "counterclockwise"], "Invalid direction"
+        if direction not in ["clockwise", "counterclockwise"]:
+            raise MovementError("Invalid rotation direction")
 
         if direction == "clockwise":
             self.orientation = (self.orientation + 1) % 4
@@ -71,10 +73,38 @@ class Pyramid(GamePiece):
         super().__init__(position, orientation, color)
         self.__name__ = "Pyramid"
 
-    def resolve_laser_interaction(self, side):
-        """ """
-        # XXX: Add logic for
-        return True
+    def resolve_laser_interaction(self, laser_direction):
+        """
+        Function for handling interactions between the laser and the pyramid
+        """
+        if laser_direction == "down":
+            if self.orientation == 1 or self.orientation == 2:
+                self.is_active = False
+            elif self.orientation == 0:
+                return "right"
+            elif self.orientation == 3:
+                return "left"
+        elif laser_direction == "up":
+            if self.orientation == 0 or self.orientation == 3:
+                self.is_active = False
+            elif self.orientation == 1:
+                return "right"
+            elif self.orientation == 2:
+                return "left"
+        elif laser_direction == "left":
+            if self.orientation == 2 or self.orientation == 3:
+                self.is_active = False 
+            elif self.orientation == 0:
+                return "up"
+            elif self.orientation == 1:
+                return "down"
+        elif laser_direction == "right":
+            if self.orientation == 0 or self.orientation == 1:
+                self.is_active = False
+            elif self.orientation == 2:
+                return "down"
+            elif self.orientation == 3:
+                return "up"
 
 
 class Scarab(GamePiece):
@@ -85,12 +115,30 @@ class Scarab(GamePiece):
         super().__init__(position, orientation, color)
         self.__name__ = "Scarab"
 
-    def resolve_laser_interaction(self, side):
+    def resolve_laser_interaction(self, laser_direction):
         """
         Return
         """
-        # XXX: Add logic for
-        return True
+        if laser_direction == "down":
+            if self.orientation == 0:
+                return "right"
+            else:
+                return "left"
+        elif laser_direction == "up":
+            if self.orientation == 1:
+                return "right"
+            else:
+                return "left"
+        elif laser_direction == "left":
+            if self.orientation == 0:
+                return "up"
+            else:
+                return "down"
+        elif laser_direction == "right":
+            if self.orientation == 2:
+                return "down"
+            else:
+                return "up"
 
     def is_valid_move(self, direction=None, rotation=None):
         """ """
@@ -109,10 +157,28 @@ class Anubis(GamePiece):
         super().__init__(position, orientation, color)
         self.__name__ = "Anubis"
 
-    def resolve_laser_interaction(self, side):
+    def resolve_laser_interaction(self, laser_direction):
         """ """
-        # XXX: Add logic for
-        return True
+        if laser_direction == "down":
+            if self.orientation == 0:
+                return "right"
+            else:
+                return "left"
+        elif laser_direction == "up":
+            if self.orientation == 1:
+                return "right"
+            else:
+                return "left"
+        elif laser_direction == "left":
+            if self.orientation == 0:
+                return "up"
+            else:
+                return "down"
+        elif laser_direction == "right":
+            if self.orientation == 2:
+                return "down"
+            else:
+                return "up"
 
 
 class Sphinx(GamePiece):
@@ -123,10 +189,9 @@ class Sphinx(GamePiece):
         super().__init__(position, orientation, color)
         self.__name__ = "Sphinx"
 
-    def resolve_laser_interaction(self, side):
+    def resolve_laser_interaction(self, laser_direction):
         """ """
-        # XXX: Add logic for
-        return True
+        pass
 
     def move(self, direction) -> None:
         """
@@ -134,12 +199,21 @@ class Sphinx(GamePiece):
         """
         raise MovementError("Sphinx cannot move")
 
-    def rotate(self, rotation) -> None:
+    def rotate(self, direction) -> None:
         """
         Overwrite the rotate method to prevent the sphinx from rotating invalidly
         """
-        pass
-
+        if self.orientation == 0 and direction == "counterclockwise":
+            self.orientation = 3
+        elif self.orientation == 3 and direction == "clockwise":
+            self.orientation = 0
+        elif self.orientation == 1 and direction == "clockwise":
+            self.orientation = 2
+        elif self.orientation == 2 and direction == "counterclockwise":
+            self.orientation = 1
+        else:
+            raise MovementError(f"{direction} rotation invalid for {self.color.upper()} Sphinx")
+        
     def is_valid_move(self, direction=None, rotation=None):
         """ """
         assert direction is None, "Sphinx cannot move from its position"
