@@ -198,32 +198,39 @@ class GameBoard:
         """
         # XXX: Fire the laser
         # Find the positon and orientation of the laser
-        sphinx = self.active_pieces[color]["sphinx"]
+        sphinx = [k for k in self.active_pieces[color] if k.__name__.lower() == "sphinx"][
+            0
+        ]
 
         # Get the position and orientation of the sphinx
-        sphinx_position = sphinx.position
         sphinx_orientation = sphinx.orientation
+        laser_position = sphinx.position
 
         if sphinx_orientation == 0:
             # Fire the laser up
             laser_direction = "up"
+            laser_position = (laser_position[0] - 1, laser_position[1])
         elif sphinx_orientation == 1:
-            # Fire the laser left
-            laser_direction = "left"
+            # Fire the laser right
+            laser_direction = "right"
+            laser_position = (laser_position[0], laser_position[1] + 1)
         elif sphinx_orientation == 2:
             # Fire the laser down
             laser_direction = "down"
+            laser_position = (laser_position[0] + 1, laser_position[1])
         elif sphinx_orientation == 3:
-            # Fire the laser right
-            laser_direction = "right"
+            # Fire the laser left
+            laser_direction = "left"
+            laser_position = (laser_position[0], laser_position[1] - 1)
 
         # Get the position of the laser
-        laser_position = sphinx_position
+        positions = []
 
         # Loop through the board until the laser hits a piece
         # TODO: Consider moving this to a separate function
         # TODO: Consider having a better stopping condition
         # TODO: Consider having a better way to remove pieces
+        # TODO: Don't hardcode board size
         while (
             laser_position[0] >= 0
             and laser_position[0] < 8
@@ -231,7 +238,24 @@ class GameBoard:
             and laser_position[1] < 10
             and laser_direction is not None
         ):
-            laser_direction = None
+            positions.append(laser_position)
+            
+            # Get the piece at the current position
+            piece = self._board[laser_position[0]][laser_position[1]]    
+            
+            if piece is not None:
+                # Check if the piece is a pyramid
+                laser_direction = piece.resolve_laser_interaction(laser_direction)
+                
+            # Move the laser
+            if laser_direction == "up":
+                laser_position = (laser_position[0] - 1, laser_position[1])
+            elif laser_direction == "down":
+                laser_position = (laser_position[0] + 1, laser_position[1])
+            elif laser_direction == "left":
+                laser_position = (laser_position[0], laser_position[1] - 1)
+            elif laser_direction == "right":
+                laser_position = (laser_position[0], laser_position[1] + 1)
 
         # Check for a hit
         for color in ["red", "silver"]:
