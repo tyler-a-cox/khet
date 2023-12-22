@@ -43,12 +43,18 @@ class GamePiece:
             self.position[0] -= 1
         elif direction == "right":
             self.position[0] += 1
-        # XXX: Add diagonal movement
-
-    def resolve_laser_interaction(self, side) -> None:
-        """ """
-        # XXX: Add logic for
-        return True
+        elif direction == "up-left":
+            self.position[0] -= 1
+            self.position[1] += 1
+        elif direction == "up-right":
+            self.position[0] += 1
+            self.position[1] += 1
+        elif direction == "down-left":
+            self.position[0] -= 1
+            self.position[1] -= 1
+        elif direction == "down-right":
+            self.position[0] += 1
+            self.position[1] -= 1
 
     def is_valid_move(self, direction=None, rotation=None) -> None:
         """ """
@@ -80,7 +86,9 @@ class Scarab(GamePiece):
         super().__init__(position, orientation, color)
 
     def resolve_laser_interaction(self, side):
-        """ """
+        """
+        Return
+        """
         # XXX: Add logic for
         return True
 

@@ -20,9 +20,32 @@ from khet.engine.pieces import (
 )
 
 GAME_MODES = {
-    "classic": {},
-    "imhotep": {},
-    "dynasty": {},
+    "classic": {
+        "pharaoh": 1,
+        "pyramid": 2,
+        "scarab": 2,
+        "anubis": 2,
+        "sphinx": 1,
+        "obelisk": 1,
+    },
+    "imhotep": {
+        "pharaoh": 1,
+        "pyramid": 2,
+        "scarab": 2,
+        "anubis": 2,
+        "sphinx": 1,
+        "obelisk": 1,
+        "eyeofhorus": 1,
+    },
+    "dynasty": {
+        "pharaoh": 1,
+        "pyramid": 2,
+        "scarab": 2,
+        "anubis": 2,
+        "sphinx": 1,
+        "obelisk": 1,
+        "eyeofhorus": 1,
+    },
 }
 
 GAME_PIECES = {
@@ -81,19 +104,32 @@ class GameBoard:
         ), "Must specify either position or rotation"
 
     def end_turn(self, color) -> None:
-        """ 
-        
+        """
+
         Parameters:
             color: str
                 Color of the player ending their turn
         """
         # XXX: Fire the laser
         # Find the positon and orientation of the laser
+        sphinx = self.active_pieces[color]["sphinx"]
 
+        # Get the position and orientation of the sphinx
+        sphinx_position = sphinx.position
+        sphinx_orientation = sphinx.orientation
+
+        laser_direction = None
+
+        if sphinx_orientation == 0:
+            # Fire the laser up
+            laser_direction = "up"
+        elif sphinx_orientation == 1:
+            # Fire the laser left
+            laser_direction = "left"
 
     def get_all_valid_moves(self, color) -> list:
-        """ 
-        
+        """
+
         Parameters:
             color: str
                 Color of the player to get the valid moves for
@@ -104,9 +140,9 @@ class GameBoard:
             all_moves.append(moves)
 
         return all_moves
-        
+
     def get_valid_move(self, piece, color) -> list:
-        """ 
+        """
         Get valid moves for a given piece
 
         Parameters:
@@ -117,5 +153,18 @@ class GameBoard:
         """
         # Loop through all the pieces of the given color
         piece.is_valid_move()
-        
-        return [] 
+
+        return []
+
+    def assess_valid_moves(self, color) -> list:
+        """
+        Assess the valid moves for a given color
+
+        TODO: consider moving this to the game ai module
+        """
+        # Generate a list of all valid moves for the given color
+        valid_moves = self.get_all_valid_moves(color)
+
+        # Loop through all the valid moves on the board and assess their value
+        for move in valid_moves:
+            pass
