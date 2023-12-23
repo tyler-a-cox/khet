@@ -119,25 +119,25 @@ class Scarab(GamePiece):
         Return
         """
         if laser_direction == "down":
-            if self.orientation == 0:
-                return "right"
-            else:
+            if self.orientation == 0 or self.orientation == 2:
                 return "left"
+            else:
+                return "right"
         elif laser_direction == "up":
-            if self.orientation == 1:
+            if self.orientation == 0 or self.orientation == 2:
                 return "right"
             else:
                 return "left"
         elif laser_direction == "left":
-            if self.orientation == 0:
-                return "up"
-            else:
+            if self.orientation == 0 or self.orientation == 2:
                 return "down"
+            else:
+                return "up"
         elif laser_direction == "right":
-            if self.orientation == 2:
-                return "down"
-            else:
+            if self.orientation == 0 or self.orientation == 2:
                 return "up"
+            else:
+                return "down"
 
     def is_valid_move(self, direction=None, rotation=None):
         """ """
@@ -160,24 +160,29 @@ class Anubis(GamePiece):
         """ """
         if laser_direction == "down":
             if self.orientation == 0:
-                return "right"
+                return
             else:
-                return "left"
+                self.is_active = False
+                return
+            
         elif laser_direction == "up":
-            if self.orientation == 1:
-                return "right"
-            else:
-                return "left"
-        elif laser_direction == "left":
-            if self.orientation == 0:
-                return "up"
-            else:
-                return "down"
-        elif laser_direction == "right":
             if self.orientation == 2:
-                return "down"
+                return
             else:
-                return "up"
+                self.is_active = False
+                return
+        elif laser_direction == "left":
+            if self.orientation == 1:
+                return
+            else:
+                self.is_active = False
+                return
+        elif laser_direction == "right":
+            if self.orientation == 3:
+                return
+            else:
+                self.is_active = False
+                return
 
 
 class Sphinx(GamePiece):
@@ -214,7 +219,7 @@ class Sphinx(GamePiece):
         else:
             raise MovementError(f"{direction} rotation invalid for {self.color.capitalize()} Sphinx in orientation {self.orientation}")
         
-    def is_valid_move(self, direction=None, rotation=None):
+    def is_valid_move(self, direction=None, rotation=None) -> bool:
         """ """
         assert direction is None, "Sphinx cannot move from its position"
         assert rotation is not None, "Must specify rotation"
