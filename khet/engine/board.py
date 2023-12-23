@@ -173,21 +173,45 @@ class GameBoard:
         """ """
         pass
 
-    def move_piece(self, color, piece, position=None, rotation=None) -> None:
+    def move_piece(self, color, piece_name, direction=None, rotation=None) -> None:
         """
+        
         Parameters:
             color: str
                 Color of the piece to move
             piece: str
                 Type of piece to move
-            position: tuple
-                (x, y) position to move the piece to
+            direction: tuple
+                Direction to move the piece. Options are up, down, left, right,
+                up-left, up-right, down-left, and down-right.
             rotation: str
-                Direction to rotate the piece
+                Direction to rotate the piece. Options are clockwise and counterclockwise.
         """
         assert (
-            position is not None or rotation is not None
+            direction is not None or rotation is not None
         ), "Must specify either position or rotation"
+
+        assert direction in [
+            "up",
+            "down",
+            "left",
+            "right",
+            "up-left",
+            "up-right",
+            "down-left",
+            "down-right",
+        ], "Invalid direction"
+
+        assert rotation in ["clockwise", "counterclockwise"], "Invalid rotation"
+
+        # Get the piece
+        piece = self.active_pieces[color][piece_name]
+
+        # Move the piece
+        if direction is not None:
+            piece.move(direction)
+        elif rotation is not None:
+            piece.rotate(rotation)
 
     def end_turn(self, color) -> None:
         """
@@ -198,9 +222,9 @@ class GameBoard:
         """
         # XXX: Fire the laser
         # Find the positon and orientation of the laser
-        sphinx = [k for k in self.active_pieces[color] if k.__name__.lower() == "sphinx"][
-            0
-        ]
+        sphinx = [
+            k for k in self.active_pieces[color] if k.__name__.lower() == "sphinx"
+        ][0]
 
         # Get the position and orientation of the sphinx
         sphinx_orientation = sphinx.orientation
@@ -239,14 +263,14 @@ class GameBoard:
             and laser_direction is not None
         ):
             positions.append(laser_position)
-            
+
             # Get the piece at the current position
-            piece = self._board[laser_position[0]][laser_position[1]]    
-            
+            piece = self._board[laser_position[0]][laser_position[1]]
+
             if piece is not None:
                 # Check if the piece is a pyramid
                 laser_direction = piece.resolve_laser_interaction(laser_direction)
-                
+
             # Move the laser
             if laser_direction == "up":
                 laser_position = (laser_position[0] - 1, laser_position[1])

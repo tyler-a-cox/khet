@@ -53,8 +53,7 @@ class GamePiece:
         upmove, rightmove = MOVEMENT_DICT[direction]
 
         # Update positions
-        self.position[0] += upmove
-        self.position[1] += rightmove
+        self.position = (self.position[0] + upmove, self.position[1] + rightmove)
 
     def is_valid_move(self, direction=None, rotation=None) -> None:
         """ """
