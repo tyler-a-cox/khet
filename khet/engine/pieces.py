@@ -5,14 +5,14 @@ File for handling the pieces in the game
 from khet.engine.exceptions import MovementError
 
 MOVEMENT_DICT = {
-    "up": (1, 0),
-    "down": (-1, 0),
+    "up": (-1, 0),
+    "down": (1, 0),
     "left": (0, -1),
     "right": (0, 1),
-    "up-left": (1, -1),
-    "up-right": (1, 1),
-    "down-left": (-1, -1),
-    "down-right": (-1, 1),
+    "up-left": (-1, -1),
+    "up-right": (-1, 1),
+    "down-left": (1, -1),
+    "down-right": (1, 1),
 }
 
 class GamePiece:
