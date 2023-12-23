@@ -196,6 +196,7 @@ class Sphinx(GamePiece):
     def resolve_laser_interaction(self, laser_direction):
         """
         """
+        # Nothing happens if the sphinx is hit from any side
         return
 
     def move(self, direction) -> None:
