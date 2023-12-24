@@ -141,7 +141,6 @@ class GameBoard:
 
         # Initialize the board
         self._board = [[None for _ in range(10)] for _ in range(8)]
-        self.active_pieces = {"red": [], "silver": []}
 
         # Populate the board
         self._populate_board(game_mode)
@@ -166,16 +165,15 @@ class GameBoard:
         # Add the piece to the board
         self._board[position[0]][position[1]] = new_piece
 
-        # Add the piece to the active pieces
-        self.active_pieces[color].append(new_piece)
-
     def remove_piece(self, color, piece) -> None:
         """ """
         pass
 
-    def move_piece(self, color, piece_name, direction=None, rotation=None) -> None:
+    def move_piece(
+        self, position, color=None, direction=None, rotation=None, check_color=True
+    ) -> None:
         """
-        
+
         Parameters:
             color: str
                 Color of the piece to move
@@ -205,7 +203,11 @@ class GameBoard:
         assert rotation in ["clockwise", "counterclockwise"], "Invalid rotation"
 
         # Get the piece
-        piece = self.active_pieces[color][piece_name]
+        piece = self._board[position[0]][position[1]]
+
+        # Check if the piece is the correct color
+        if check_color and color is not None:
+            assert piece.color == color, "Invalid color"
 
         # Move the piece
         if direction is not None:
@@ -305,9 +307,10 @@ class GameBoard:
                 Color of the player to get the valid moves for
         """
         all_moves = []
-        for piece in self.active_pieces[color]:
-            moves = self.get_valid_move(piece, color)
-            all_moves.append(moves)
+        active_pieces = sum([[piece for piece in row if piece and piece.color == color] for row in self._board], [])
+        for piece in active_pieces:
+            moves, rotations = self.get_valid_move(piece, color)
+            all_moves.append((piece.position, moves, rotations))
 
         return all_moves
 
@@ -322,7 +325,11 @@ class GameBoard:
                 Color of the player to get the valid moves for
         """
         # Loop through all the pieces of the given color
-        piece.is_valid_move()
+        move, rotation = piece.is_valid_move()
+
+        # Check in area around the piece for valid moves
+        piece_position = piece.position
+         
 
         return []
 
