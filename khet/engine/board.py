@@ -309,7 +309,7 @@ class GameBoard:
         all_moves = []
         active_pieces = sum([[piece for piece in row if piece and piece.color == color] for row in self._board], [])
         for piece in active_pieces:
-            moves, rotations = self.get_valid_move(piece, color)
+            moves, rotations = piece.get_valid_moves(piece, color)
             all_moves.append((piece.position, moves, rotations))
 
         return all_moves
@@ -328,8 +328,7 @@ class GameBoard:
         move, rotation = piece.is_valid_move()
 
         # Check in area around the piece for valid moves
-        piece_position = piece.position
-         
+        piece_position = piece.position 
 
         return []
 

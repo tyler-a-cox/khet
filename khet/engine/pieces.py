@@ -15,6 +15,7 @@ MOVEMENT_DICT = {
     "down-right": (1, 1),
 }
 
+
 class GamePiece:
     """
     Base class for all game pieces
@@ -55,12 +56,24 @@ class GamePiece:
         # Update positions
         self.position = (self.position[0] + upmove, self.position[1] + rightmove)
 
-    def is_valid_move(self, direction=None, rotation=None) -> None:
+    def get_valid_moves(self, direction, rotation) -> list:
+        """ """
+        for direction in ["up", "down", "left", "right"]:
+            if self.is_valid_move(direction=direction):
+                yield (direction, None)
+
+        for rotation in ["clockwise", "counterclockwise"]:
+            if self.is_valid_move(rotation=rotation):
+                yield (None, rotation)
+        
+
+    def is_valid_move(self, direction=None, rotation=None) -> bool:
         """ """
         assert (
             direction is not None or rotation is not None
         ), "Must specify either direction or rotation"
-        
+
+        # For the base class, all moves are valid
         return True
 
 
@@ -92,7 +105,7 @@ class Pyramid(GamePiece):
                 return "left"
         elif laser_direction == "left":
             if self.orientation == 2 or self.orientation == 3:
-                self.is_active = False 
+                self.is_active = False
             elif self.orientation == 0:
                 return "up"
             elif self.orientation == 1:
@@ -139,14 +152,6 @@ class Scarab(GamePiece):
             else:
                 return "down"
 
-    def is_valid_move(self, direction=None, rotation=None):
-        """ """
-        assert (
-            direction is not None or rotation is not None
-        ), "Must specify either direction or rotation"
-        # XXX: Add logic for
-        return True
-
 
 class Anubis(GamePiece):
     """ """
@@ -164,7 +169,7 @@ class Anubis(GamePiece):
             else:
                 self.is_active = False
                 return
-            
+
         elif laser_direction == "up":
             if self.orientation == 2:
                 return
@@ -183,6 +188,7 @@ class Anubis(GamePiece):
             else:
                 self.is_active = False
                 return
+            
 
 
 class Sphinx(GamePiece):
@@ -194,8 +200,7 @@ class Sphinx(GamePiece):
         self.__name__ = "Sphinx"
 
     def resolve_laser_interaction(self, laser_direction):
-        """
-        """
+        """ """
         # Nothing happens if the sphinx is hit from any side
         return
 
@@ -218,15 +223,16 @@ class Sphinx(GamePiece):
         elif self.orientation == 2 and direction == "counterclockwise":
             self.orientation = 1
         else:
-            raise MovementError(f"{direction} rotation invalid for {self.color.capitalize()} Sphinx in orientation {self.orientation}")
-        
+            raise MovementError(
+                f"{direction} rotation invalid for {self.color.capitalize()} Sphinx in orientation {self.orientation}"
+            )
+
     def is_valid_move(self, direction=None, rotation=None) -> bool:
         """ """
-        assert direction is None, "Sphinx cannot move from its position"
-        assert rotation is not None, "Must specify rotation"
-
-        # XXX: Add logic for
-        return True
+        if direction is not None:
+            return False
+        
+        return rotation in ["clockwise", "counterclockwise"]
 
 
 class Pharaoh(GamePiece):
