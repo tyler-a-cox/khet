@@ -14,3 +14,23 @@ Advanced evaluation:
 - Use a pre-trained neural network to evaluate the board state
 - Generate a dataset of board states and their corresponding evaluations and train a neural network on it
 """
+
+PIECE_SCORES = {
+    "pharaoh": 100,
+    "scarab": 0,
+    "pyramid": 20,
+    "anubis": 30,
+}
+
+def evaluate_board_simple(board):
+    """
+    """
+    # List for each color
+    red_score = 0
+    silver_score = 0
+
+    for row in board:
+        for piece in row:
+            if piece and piece.color == "silver":
+                pass
+    
