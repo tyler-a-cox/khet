@@ -58,14 +58,22 @@ class GamePiece:
 
     def get_valid_moves(self, direction, rotation) -> list:
         """ """
-        for direction in ["up", "down", "left", "right"]:
+        for direction in [
+            "up",
+            "down",
+            "left",
+            "right",
+            "up-left",
+            "up-right",
+            "down-left",
+            "down-right",
+        ]:
             if self.is_valid_move(direction=direction):
                 yield (direction, None)
 
         for rotation in ["clockwise", "counterclockwise"]:
             if self.is_valid_move(rotation=rotation):
                 yield (None, rotation)
-        
 
     def is_valid_move(self, direction=None, rotation=None) -> bool:
         """ """
@@ -188,7 +196,6 @@ class Anubis(GamePiece):
             else:
                 self.is_active = False
                 return
-            
 
 
 class Sphinx(GamePiece):
@@ -231,7 +238,7 @@ class Sphinx(GamePiece):
         """ """
         if direction is not None:
             return False
-        
+
         return rotation in ["clockwise", "counterclockwise"]
 
 
