@@ -66,7 +66,7 @@ class GamePiece:
         # Update positions
         self.position = (self.position[0] + upmove, self.position[1] + rightmove)
 
-    def get_valid_moves(self, direction, rotation) -> list:
+    def get_valid_moves(self) -> list:
         """ """
         for direction in [
             "up",

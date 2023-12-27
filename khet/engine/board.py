@@ -331,9 +331,9 @@ class GameBoard:
             [],
         )
         for piece in active_pieces:
-            moves = piece.get_valid_moves(piece, color)
-            moves = filter(lambda x: not self.is_move_valid(piece, x[0], x[1]), moves)
-            all_moves.append((piece, moves))
+            moves = piece.get_valid_moves()
+            valid_moves = list(filter(lambda x: self.is_move_valid(piece, x[0], x[1]), moves))
+            all_moves.append((piece, valid_moves))
 
         return all_moves
 
@@ -363,9 +363,9 @@ class GameBoard:
             ]
 
             if (
-                new_position[0] > 0
+                new_position[0] >= 0
                 and new_position[0] < 8
-                and new_position[1] > 0
+                and new_position[1] >= 0
                 and new_position[1] < 10
                 and self._board[new_position[0]][new_position[1]] is None
             ):
