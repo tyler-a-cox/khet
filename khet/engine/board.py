@@ -199,9 +199,10 @@ class GameBoard:
             "up-right",
             "down-left",
             "down-right",
+            None,
         ], "Invalid direction"
 
-        assert rotation in ["clockwise", "counterclockwise"], "Invalid rotation"
+        assert rotation in ["clockwise", "counterclockwise", None], "Invalid rotation"
 
         # Get the piece
         piece = self._board[position[0]][position[1]]
@@ -336,7 +337,7 @@ class GameBoard:
 
         Returns:
             bool
-                True if the move is valid, False otherwise 
+                True if the move is valid, False otherwise
         """
         position = list(piece.position)
         # Check if the move is valid
@@ -357,7 +358,7 @@ class GameBoard:
                 return True
             else:
                 return False
-            
+
         # Rotation is always valid if previous conditions are met
         return True
 
