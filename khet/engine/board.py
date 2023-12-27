@@ -217,6 +217,19 @@ class GameBoard:
         elif rotation is not None:
             piece.rotate(rotation)
 
+        if direction is not None:
+            # Get the new position
+            new_position = [
+                position[0] + MOVEMENT_DICT[direction][0],
+                position[1] + MOVEMENT_DICT[direction][1],
+            ]
+
+            # Move the piece on the board
+            self._board[position[0]][position[1]] = None
+            self._board[new_position[0]][new_position[1]] = piece
+
+        
+
     def end_turn(self, color) -> None:
         """
 

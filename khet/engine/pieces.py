@@ -48,7 +48,17 @@ class GamePiece:
 
     def move(self, direction) -> None:
         """ """
-        assert direction in ["up", "down", "left", "right"], "Invalid direction"
+        assert direction in [
+            "up",
+            "down",
+            "left",
+            "right",
+            "up-left",
+            "up-right",
+            "down-left",
+            "down-right",
+            None,
+        ], "Invalid direction"
 
         # Dictionary for movement
         upmove, rightmove = MOVEMENT_DICT[direction]
