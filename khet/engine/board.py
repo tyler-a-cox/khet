@@ -16,6 +16,7 @@ from khet.engine.pieces import (
     Anubis,
     Sphinx,
     EyeOfHorus,
+    MOVEMENT_DICT,
 )
 
 # Setup positions and orientations for the different game pieces in each game modes
@@ -320,23 +321,42 @@ class GameBoard:
 
         return all_moves
 
-    def get_valid_move(self, piece, color) -> list:
+    def is_move_valid(self, piece, move, rotation):
         """
-        Get valid moves for a given piece
 
         Parameters:
             piece: str
-                Type of piece to get the valid moves for
-            color: str
-                Color of the player to get the valid moves for
+                Type of piece to move
+            move: str
+                Direction to move the piece. Options are up, down, left, right,
+                up-left, up-right, down-left, and down-right.
+            rotation: str
+                Direction to rotate the piece. Options are clockwise and counterclockwise.
+
+        Returns:
+            bool
+                True if the move is valid, False otherwise 
         """
-        # Loop through all the pieces of the given color
-        move, rotation = piece.is_valid_move()
-
-        # Check in area around the piece for valid moves
-        piece_position = piece.position
-
-        return []
+        position = list(piece.position)
+        new_position = [
+            position[0] + MOVEMENT_DICT[move][0],
+            position[1] + MOVEMENT_DICT[move][1],
+        ]
+        # Check if the move is valid
+        if move is not None:
+            if (
+                new_position[0] > 0
+                and new_position[0] < 8
+                and new_position[1] > 0
+                and new_position[1] < 10
+                and self._board[new_position[0]][new_position[1]] is None
+            ):
+                return True
+            else:
+                return False
+            
+        # Rotation is always valid if previous conditions are met
+        return True
 
     def assess_valid_moves(self, color) -> list:
         """
