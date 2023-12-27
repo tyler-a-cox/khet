@@ -238,9 +238,12 @@ class GameBoard:
         """
         # XXX: Fire the laser
         # Find the positon and orientation of the laser
-        sphinx = [
-            k for k in self.active_pieces[color] if k.__name__.lower() == "sphinx"
-        ][0]
+        active_pieces = [piece for row in self._board for piece in row if piece]
+
+        for piece in active_pieces:
+            if piece and piece.color == color and piece.__name__.lower() == "sphinx":
+                sphinx = piece
+                break
 
         # Get the position and orientation of the sphinx
         sphinx_orientation = sphinx.orientation
@@ -298,20 +301,19 @@ class GameBoard:
                 laser_position = (laser_position[0], laser_position[1] + 1)
 
         # Check for a hit
-        for color in ["red", "silver"]:
-            removal_index = []
-            for pi, piece in enumerate(self.active_pieces[color]):
-                if not piece.is_active:
-                    removal_index.append(pi)
+        removal_index = []
+        for pi, piece in enumerate(active_pieces):
+            if not piece.is_active:
+                removal_index.append(pi)
 
-            # Reverse the removal index list
-            removal_index = sorted(removal_index, reverse=True)
+        # Reverse the removal index list
+        removal_index = sorted(removal_index, reverse=True)
 
-            # Remove the pieces
-            for pi in removal_index:
-                pos_y, pos_x = self.active_pieces[color][pi].position
-                self._board[pos_y][pos_x] = None
-                self.active_pieces[color].pop(pi)
+        # Remove the pieces
+        for pi in removal_index:
+            pos_y, pos_x = active_pieces[pi].position
+            self._board[pos_y][pos_x] = None
+            active_pieces[color].pop(pi)
 
     def get_all_valid_moves(self, color) -> list:
         """
