@@ -317,6 +317,7 @@ class GameBoard:
         )
         for piece in active_pieces:
             moves = piece.get_valid_moves(piece, color)
+            moves = filter(lambda x: self.is_move_valid(piece, x[0], x[1]), moves)
             all_moves.append((piece, moves))
 
         return all_moves
@@ -338,12 +339,14 @@ class GameBoard:
                 True if the move is valid, False otherwise 
         """
         position = list(piece.position)
-        new_position = [
-            position[0] + MOVEMENT_DICT[move][0],
-            position[1] + MOVEMENT_DICT[move][1],
-        ]
         # Check if the move is valid
         if move is not None:
+            # Get the new position
+            new_position = [
+                position[0] + MOVEMENT_DICT[move][0],
+                position[1] + MOVEMENT_DICT[move][1],
+            ]
+
             if (
                 new_position[0] > 0
                 and new_position[0] < 8
