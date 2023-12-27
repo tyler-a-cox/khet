@@ -229,8 +229,6 @@ class GameBoard:
             self._board[position[0]][position[1]] = old_piece
             self._board[new_position[0]][new_position[1]] = piece
 
-        
-
     def end_turn(self, color) -> None:
         """
 
@@ -323,16 +321,17 @@ class GameBoard:
                 Color of the player to get the valid moves for
         """
         all_moves = []
-        active_pieces = sum(
-            [
-                [piece for piece in row if piece and piece.color == color]
-                for row in self._board
-            ],
-            [],
-        )
+        active_pieces = [
+            piece
+            for row in self._board
+            for piece in row
+            if piece and piece.color == color
+        ]
         for piece in active_pieces:
             moves = piece.get_valid_moves()
-            valid_moves = list(filter(lambda x: self.is_move_valid(piece, x[0], x[1]), moves))
+            valid_moves = list(
+                filter(lambda x: self.is_move_valid(piece, x[0], x[1]), moves)
+            )
             all_moves.append((piece, valid_moves))
 
         return all_moves
