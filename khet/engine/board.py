@@ -313,7 +313,7 @@ class GameBoard:
         for pi in removal_index:
             pos_y, pos_x = active_pieces[pi].position
             self._board[pos_y][pos_x] = None
-            active_pieces[color].pop(pi)
+            active_pieces.pop(pi)
 
     def get_all_valid_moves(self, color) -> list:
         """
