@@ -225,7 +225,8 @@ class GameBoard:
             ]
 
             # Move the piece on the board
-            self._board[position[0]][position[1]] = None
+            old_piece = self._board[new_position[0]][new_position[1]]
+            self._board[position[0]][position[1]] = old_piece
             self._board[new_position[0]][new_position[1]] = piece
 
         
