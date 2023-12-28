@@ -6,27 +6,36 @@ Incorporate alpha-beta pruning to reduce the number of nodes to evaluate
 import math
 from khet.engine.evaluation import evaluate_board_simple
 
-def alpha_beta_pruning(board, depth, alpha, beta, maximizingPlayer):
-    """
-    """
+def alpha_beta_search(board, depth, alpha=math.inf, beta=-math.inf, maximizing_player=True):
     if depth == 0 or board.is_game_over():
         return evaluate_board_simple(board)
-    
-    if maximizingPlayer:
-        maxEval = -math.inf
-        for move in board.get_all_valid_moves():
-            eval = alpha_beta_pruning(board, depth - 1, alpha, beta, False)
-            maxEval = max(maxEval, eval)
-            alpha = max(alpha, eval)
+
+    legal_moves = board.get_all_valid_moves(board)
+
+    if maximizing_player:
+        max_eval = float('-inf')
+        best_move = None
+        for move in legal_moves:
+            new_board = make_move(board, move)
+            eval_score = alpha_beta_search(new_board, depth - 1, alpha, beta, False)
+            if eval_score > max_eval:
+                max_eval = eval_score
+                best_move = move
+            alpha = max(alpha, eval_score)
             if beta <= alpha:
-                break
-        return maxEval
+                break  # Beta cutoff
+        return best_move
+
     else:
-        minEval = math.inf
-        for move in board.get_all_valid_moves():
-            eval = alpha_beta_pruning(board, depth - 1, alpha, beta, True)
-            minEval = min(minEval, eval)
-            beta = min(beta, eval)
+        min_eval = float('inf')
+        best_move = None
+        for move in legal_moves:
+            new_board = make_move(board, move)
+            eval_score = alpha_beta_search(new_board, depth - 1, alpha, beta, True)
+            if eval_score < min_eval:
+                min_eval = eval_score
+                best_move = move
+            beta = min(beta, eval_score)
             if beta <= alpha:
-                break
-        return minEval
+                break  # Alpha cutoff
+        return best_move
