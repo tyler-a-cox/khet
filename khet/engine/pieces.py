@@ -227,29 +227,38 @@ class Sphinx(GamePiece):
         """
         raise MovementError("Sphinx cannot move")
 
-    def rotate(self, direction) -> None:
+    def rotate(self, rotation) -> None:
         """
         Overwrite the rotate method to prevent the sphinx from rotating invalidly
         """
-        if self.orientation == 0 and direction == "counterclockwise":
+        if self.orientation == 0 and rotation == "counterclockwise":
             self.orientation = 3
-        elif self.orientation == 3 and direction == "clockwise":
+        elif self.orientation == 3 and rotation == "clockwise":
             self.orientation = 0
-        elif self.orientation == 1 and direction == "clockwise":
+        elif self.orientation == 1 and rotation == "clockwise":
             self.orientation = 2
-        elif self.orientation == 2 and direction == "counterclockwise":
+        elif self.orientation == 2 and rotation == "counterclockwise":
             self.orientation = 1
         else:
             raise MovementError(
-                f"{direction} rotation invalid for {self.color.capitalize()} Sphinx in orientation {self.orientation}"
+                f"{rotation} rotation invalid for {self.color.capitalize()} Sphinx in orientation {self.orientation}"
             )
 
     def is_valid_move(self, direction=None, rotation=None) -> bool:
         """ """
         if direction is not None:
             return False
+        
+        if self.orientation == 0 and rotation == "clockwise":
+            return False
+        elif self.orientation == 3 and rotation == "counterclockwise":
+            return False
+        elif self.orientation == 1 and rotation == "counterclockwise":
+            return False
+        elif self.orientation == 2 and rotation == "clockwise":
+            return False
 
-        return rotation in ["clockwise", "counterclockwise"]
+        return True
 
 
 class Pharaoh(GamePiece):
