@@ -376,16 +376,3 @@ class GameBoard:
 
         # Rotation is always valid if previous conditions are met
         return True
-
-    def assess_valid_moves(self, color) -> list:
-        """
-        Assess the valid moves for a given color
-
-        TODO: consider moving this to the game ai module
-        """
-        # Generate a list of all valid moves for the given color
-        valid_moves = self.get_all_valid_moves(color)
-
-        # Loop through all the valid moves on the board and assess their value
-        for move in valid_moves:
-            pass
