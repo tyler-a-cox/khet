@@ -9,6 +9,7 @@ TODO:
     - Add logic for determining valid rotations
     - Add logic for obtaining a player's score for the board
 """
+import string
 from khet.engine.pieces import (
     Pharaoh,
     Pyramid,
@@ -376,3 +377,33 @@ class GameBoard:
 
         # Rotation is always valid if previous conditions are met
         return True
+
+    def is_game_over(self) -> bool:
+        """
+        Function to check if the game is over
+
+        Returns:
+            bool
+                True if the game is over, False otherwise
+        """
+        # Check if the game is over
+        pieces = [
+            piece
+            for row in self._board
+            for piece in row
+            if piece and piece.__name__.lower() == "pharaoh"
+        ]
+
+        # There should only be two pharaohs
+        return len(pieces) == 2
+    
+    def board_repr(self) -> str:
+        """ """
+        output = ''
+        rot2char = {0: 'u', 1: 'r', 2: 'd', 3: 'l'}
+        for ri, row in enumerate(self._board):
+            for ci, piece in zip(string.ascii_lowercase[:len(row)], row):
+                if piece:
+                    output += f'{piece.__name__[0]}{rot2char[piece.orientation]}{piece.color[0]}{ci}{ri}'
+
+        return output

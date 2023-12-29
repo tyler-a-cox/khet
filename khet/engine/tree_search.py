@@ -4,9 +4,19 @@ Use minimax algorithm to find the best move
 Incorporate alpha-beta pruning to reduce the number of nodes to evaluate
 """
 import math
+from copy import deepcopy
 from khet.engine.evaluation import evaluate_board_simple
 
-def alpha_beta_search(board, depth, alpha=math.inf, beta=-math.inf, maximizing_player=True):
+def make_move(board, position, direction, rotation):
+    """
+    Make a move on the board
+    """
+    new_board = deepcopy(board)
+    new_board.move_piece(position, direction, rotation)
+    new_board.end_turn()
+    return new_board
+
+def alpha_beta_search(board, depth, alpha=-math.inf, beta=math.inf, maximizing_player=True):
     if depth == 0 or board.is_game_over():
         return evaluate_board_simple(board)
 
