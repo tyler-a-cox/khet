@@ -355,13 +355,13 @@ class GameBoard:
             bool
                 True if the move is valid, False otherwise
         """
-        position = list(piece.position)
+        i, j = piece.position
         # Check if the move is valid
-        if move is not None:
+        if move:
             # Get the new position
             new_position = [
-                position[0] + MOVEMENT_DICT[move][0],
-                position[1] + MOVEMENT_DICT[move][1],
+                i + MOVEMENT_DICT[move][0],
+                j + MOVEMENT_DICT[move][1],
             ]
 
             if (
@@ -404,6 +404,11 @@ class GameBoard:
         for ri, row in enumerate(self._board):
             for ci, piece in zip(string.ascii_lowercase[:len(row)], row):
                 if piece:
-                    output += f'{piece.__name__[0]}{rot2char[piece.orientation]}{piece.color[0]}{ci}{ri}'
+                    if piece.__name__ == 'Pyramid':
+                        name = "p"
+                    else:
+                        name = piece.__name__[0]
+
+                    output += f'{name}{rot2char[piece.orientation]}{piece.color[0]}{ci}{ri}.'
 
         return output
