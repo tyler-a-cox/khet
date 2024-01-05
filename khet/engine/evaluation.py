@@ -16,10 +16,11 @@ Advanced evaluation:
 """
 
 PIECE_SCORES = {
-    "Pharaoh": 1000,
+    "Pharaoh": 5000,
     "Scarab": 0,
     "Pyramid": 200,
     "Anubis": 30,
+    "Sphinx": 0,
 }
 
 def evaluate_board_simple(board, color):
@@ -32,7 +33,7 @@ def evaluate_board_simple(board, color):
         for piece in row:
             if piece and piece.color == color:
                 score += PIECE_SCORES[piece.__name__]
-            else:
+            elif piece:
                 score -= PIECE_SCORES[piece.__name__]
 
     return score
