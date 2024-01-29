@@ -224,12 +224,10 @@ class GameBoard:
 
         # Move the piece
         if direction is not None:
-            piece.move(direction)
-
             # Move the piece on the board
-            #old_piece = self._board[piece.position[0]][piece.position[0]]
+            #old_piece = self._board[new_position[0]][new_position[1]]
             self._board[position[0]][position[1]] = None
-            self._board[piece.position[0]][piece.position[1]] = piece
+            self._board[position[0]][position[1]] = piece
         elif rotation is not None:
             piece.rotate(rotation)
 
@@ -243,17 +241,17 @@ class GameBoard:
         """
         # XXX: Fire the laser
         # Find the positon and orientation of the laser
-        active_pieces = [piece for row in self._board for piece in row if piece]
+        active_pieces = [piece for ri, row in enumerate(self._board) for rj, piece in enumerate(row) if piece]
 
         # Find the sphinx piece for the player
-        for piece in active_pieces:
+        for piece, (xi, yi) in active_pieces:
             if piece and piece.color == color and piece.__name__.lower() == "sphinx":
-                sphinx = piece
+                sphinx_orientation = piece.orientation
+                laser_x, laser_y = xi, yi
                 break
 
         # Get the position and orientation of the sphinx
-        sphinx_orientation = sphinx.orientation
-        laser_x, laser_y = sphinx.position
+
 
         if sphinx_orientation == 0:
             # Fire the laser up
@@ -304,7 +302,7 @@ class GameBoard:
 
         # Check for a hit
         removal_index = []
-        for pi, piece in enumerate(active_pieces):
+        for pi, (piece, _) in enumerate(active_pieces):
             if not piece.is_active:
                 removal_index.append(pi)
 
@@ -358,6 +356,7 @@ class GameBoard:
             bool
                 True if the move is valid, False otherwise
         """
+        # TODO: piece doesn't have positional information
         i, j = piece.position
         # Check if the move is valid
         if move:
