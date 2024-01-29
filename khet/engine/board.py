@@ -311,7 +311,7 @@ class GameBoard:
 
         # Remove the pieces
         for pi in removal_index:
-            pos_y, pos_x = active_pieces[pi].position
+            pos_y, pos_x = active_pieces[pi][1]
             self._board[pos_y][pos_x] = None
             active_pieces.pop(pi)
 
