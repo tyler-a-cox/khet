@@ -340,7 +340,7 @@ class GameBoard:
 
         return all_moves
 
-    def is_move_valid(self, piece, move, rotation):
+    def is_move_valid(self, position, piece, move, rotation):
         """
 
         Parameters:
@@ -356,8 +356,8 @@ class GameBoard:
             bool
                 True if the move is valid, False otherwise
         """
-        # TODO: piece doesn't have positional information
-        i, j = piece.position
+        # Unpack position
+        i, j = position
         # Check if the move is valid
         if move:
             # Get the new position
