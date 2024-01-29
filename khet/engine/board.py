@@ -17,7 +17,6 @@ from khet.engine.pieces import (
     Anubis,
     Sphinx,
     EyeOfHorus,
-    MOVEMENT_DICT,
 )
 
 MOVEMENT_DICT = {
