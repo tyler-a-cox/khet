@@ -20,6 +20,17 @@ from khet.engine.pieces import (
     MOVEMENT_DICT,
 )
 
+MOVEMENT_DICT = {
+    "up": (-1, 0),
+    "down": (1, 0),
+    "left": (0, -1),
+    "right": (0, 1),
+    "up-left": (-1, -1),
+    "up-right": (-1, 1),
+    "down-left": (1, -1),
+    "down-right": (1, 1),
+}
+
 # Setup positions and orientations for the different game pieces in each game modes
 # TODO: Consider moving this to a config file
 GAME_MODES = {
@@ -215,20 +226,14 @@ class GameBoard:
         # Move the piece
         if direction is not None:
             piece.move(direction)
+
+            # Move the piece on the board
+            #old_piece = self._board[piece.position[0]][piece.position[0]]
+            self._board[position[0]][position[1]] = None
+            self._board[piece.position[0]][piece.position[1]] = piece
         elif rotation is not None:
             piece.rotate(rotation)
 
-        if direction is not None:
-            # Get the new position
-            new_position = [
-                position[0] + MOVEMENT_DICT[direction][0],
-                position[1] + MOVEMENT_DICT[direction][1],
-            ]
-
-            # Move the piece on the board
-            old_piece = self._board[new_position[0]][new_position[1]]
-            self._board[position[0]][position[1]] = old_piece
-            self._board[new_position[0]][new_position[1]] = piece
 
     def end_turn(self, color) -> None:
         """
@@ -241,6 +246,7 @@ class GameBoard:
         # Find the positon and orientation of the laser
         active_pieces = [piece for row in self._board for piece in row if piece]
 
+        # Find the sphinx piece for the player
         for piece in active_pieces:
             if piece and piece.color == color and piece.__name__.lower() == "sphinx":
                 sphinx = piece
@@ -248,27 +254,24 @@ class GameBoard:
 
         # Get the position and orientation of the sphinx
         sphinx_orientation = sphinx.orientation
-        laser_position = sphinx.position
+        laser_x, laser_y = sphinx.position
 
         if sphinx_orientation == 0:
             # Fire the laser up
             laser_direction = "up"
-            laser_position = (laser_position[0] - 1, laser_position[1])
+            laser_x -= 1
         elif sphinx_orientation == 1:
             # Fire the laser right
             laser_direction = "right"
-            laser_position = (laser_position[0], laser_position[1] + 1)
+            laser_y += 1
         elif sphinx_orientation == 2:
             # Fire the laser down
             laser_direction = "down"
-            laser_position = (laser_position[0] + 1, laser_position[1])
+            laser_x += 1
         elif sphinx_orientation == 3:
             # Fire the laser left
             laser_direction = "left"
-            laser_position = (laser_position[0], laser_position[1] - 1)
-
-        # Get the position of the laser
-        positions = []
+            laser_y -= 1
 
         # Loop through the board until the laser hits a piece
         # TODO: Consider moving this to a separate function
@@ -276,16 +279,15 @@ class GameBoard:
         # TODO: Consider having a better way to remove pieces
         # TODO: Don't hardcode board size
         while (
-            laser_position[0] >= 0
-            and laser_position[0] < 8
-            and laser_position[1] >= 0
-            and laser_position[1] < 10
+            laser_x >= 0
+            and laser_x < 8
+            and laser_y >= 0
+            and laser_y < 10
             and laser_direction is not None
         ):
-            positions.append(laser_position)
 
             # Get the piece at the current position
-            piece = self._board[laser_position[0]][laser_position[1]]
+            piece = self._board[laser_x][laser_y]
 
             if piece is not None:
                 # Check if the piece is a pyramid
@@ -293,13 +295,13 @@ class GameBoard:
 
             # Move the laser
             if laser_direction == "up":
-                laser_position = (laser_position[0] - 1, laser_position[1])
+                laser_x -= 1
             elif laser_direction == "down":
-                laser_position = (laser_position[0] + 1, laser_position[1])
+                laser_x += 1
             elif laser_direction == "left":
-                laser_position = (laser_position[0], laser_position[1] - 1)
+                laser_y -= 1
             elif laser_direction == "right":
-                laser_position = (laser_position[0], laser_position[1] + 1)
+                laser_y += 1
 
         # Check for a hit
         removal_index = []
@@ -332,9 +334,11 @@ class GameBoard:
         ]
         for piece in active_pieces:
             moves = piece.get_valid_moves()
+            #valid_moves = (move for move in moves if self.is_move_valid(piece, move[0], move[1]))
             valid_moves = list(
                 filter(lambda x: self.is_move_valid(piece, x[0], x[1]), moves)
             )
+            #valid_moves = filter(lambda x: self.is_move_valid(piece, x[0], x[1]), moves)
             all_moves.append((piece, valid_moves))
 
         return all_moves
@@ -359,10 +363,10 @@ class GameBoard:
         # Check if the move is valid
         if move:
             # Get the new position
-            new_position = [
+            new_position = (
                 i + MOVEMENT_DICT[move][0],
-                j + MOVEMENT_DICT[move][1],
-            ]
+                j + MOVEMENT_DICT[move][1]
+            )
 
             if (
                 new_position[0] >= 0

@@ -4,34 +4,20 @@ File for handling the pieces in the game
 
 from khet.engine.exceptions import MovementError
 
-MOVEMENT_DICT = {
-    "up": (-1, 0),
-    "down": (1, 0),
-    "left": (0, -1),
-    "right": (0, 1),
-    "up-left": (-1, -1),
-    "up-right": (-1, 1),
-    "down-left": (1, -1),
-    "down-right": (1, 1),
-}
-
 
 class GamePiece:
     """
     Base class for all game pieces
     """
 
-    def __init__(self, position, orientation, color) -> None:
+    def __init__(self, orientation, color) -> None:
         """
         Parameters:
-            position: tuple
-                (x, y) position of the piece
             orientation: int:
                 0-3, 0 is facing up, 1 is facing right, etc.
             color: str
                 Color of the piece
         """
-        self.position = position
         self.orientation = orientation
         self.color = color
         self.is_active = True
@@ -45,26 +31,6 @@ class GamePiece:
             self.orientation = (self.orientation + 1) % 4
         elif direction == "counterclockwise":
             self.orientation = (self.orientation - 1) % 4
-
-    def move(self, direction) -> None:
-        """ """
-        assert direction in [
-            "up",
-            "down",
-            "left",
-            "right",
-            "up-left",
-            "up-right",
-            "down-left",
-            "down-right",
-            None,
-        ], "Invalid direction"
-
-        # Dictionary for movement
-        upmove, rightmove = MOVEMENT_DICT[direction]
-
-        # Update positions
-        self.position = (self.position[0] + upmove, self.position[1] + rightmove)
 
     def get_valid_moves(self) -> list:
         """ """
@@ -98,9 +64,9 @@ class GamePiece:
 class Pyramid(GamePiece):
     """ """
 
-    def __init__(self, position, orientation, color):
+    def __init__(self, orientation, color):
         """ """
-        super().__init__(position, orientation, color)
+        super().__init__(orientation, color)
         self.__name__ = "Pyramid"
 
     def resolve_laser_interaction(self, laser_direction):
@@ -140,9 +106,9 @@ class Pyramid(GamePiece):
 class Scarab(GamePiece):
     """ """
 
-    def __init__(self, position, orientation, color):
+    def __init__(self, orientation, color):
         """ """
-        super().__init__(position, orientation, color)
+        super().__init__(orientation, color)
         self.__name__ = "Scarab"
 
     def resolve_laser_interaction(self, laser_direction):
@@ -174,9 +140,9 @@ class Scarab(GamePiece):
 class Anubis(GamePiece):
     """ """
 
-    def __init__(self, position, orientation, color):
+    def __init__(self, orientation, color):
         """ """
-        super().__init__(position, orientation, color)
+        super().__init__(orientation, color)
         self.__name__ = "Anubis"
 
     def resolve_laser_interaction(self, laser_direction):
@@ -211,9 +177,9 @@ class Anubis(GamePiece):
 class Sphinx(GamePiece):
     """ """
 
-    def __init__(self, position, orientation, color):
+    def __init__(self, orientation, color):
         """ """
-        super().__init__(position, orientation, color)
+        super().__init__(orientation, color)
         self.__name__ = "Sphinx"
 
     def resolve_laser_interaction(self, laser_direction):
@@ -264,9 +230,9 @@ class Sphinx(GamePiece):
 class Pharaoh(GamePiece):
     """ """
 
-    def __init__(self, position, orientation, color):
+    def __init__(self, orientation, color):
         """ """
-        super().__init__(position, orientation, color)
+        super().__init__(orientation, color)
         self.__name__ = "Pharaoh"
 
     def resolve_laser_interaction(self, laser_direction):
@@ -278,7 +244,7 @@ class Pharaoh(GamePiece):
 class EyeOfHorus(GamePiece):
     """ """
 
-    def __init__(self, position, orientation, color):
+    def __init__(self, orientation, color):
         """ """
-        super().__init__(position, orientation, color)
+        super().__init__(orientation, color)
         self.__name__ = "EyeOfHorus"
