@@ -1,0 +1,20 @@
+[package]
+name = "khet-py"
+description = "Python bindings for the Khet engine."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "khet_py"
+# `rlib` alongside `cdylib` so `cargo test`/`cargo check` can still build this
+# crate as a normal library; the extension module itself is the cdylib.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+khet-core = { path = "../khet-core" }
+# Pinned to a release that builds on the workspace's 1.75 MSRV.  Newer pyo3 is
+# fine on a current toolchain but would silently raise the floor.
+pyo3 = { version = "0.22", features = ["extension-module"] }

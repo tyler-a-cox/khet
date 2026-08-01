@@ -1,0 +1,41 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "khet"
+description = "Khet (laser chess): a Rust engine with a Python browser UI."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Tyler Cox", email = "tyler.a.cox@berkeley.edu" }]
+requires-python = ">=3.8"
+keywords = ["khet", "laser chess", "game engine", "alpha-beta", "rust"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+# No runtime dependencies on purpose.  The engine is the compiled extension and
+# the server, bot and CLI are stdlib, so the wheel installs into a bare venv.
+dependencies = []
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "maturin>=1.5,<2.0"]
+
+[project.scripts]
+khet = "khet.cli:main"
+
+[project.urls]
+Repository = "https://github.com/tyler-a-cox/khet"
+
+[tool.maturin]
+manifest-path = "crates/khet-py/Cargo.toml"
+# Mixed layout: hand-written Python under python/, the compiled extension
+# dropped in beside it as khet._engine.
+python-source = "python"
+module-name = "khet._engine"
+features = ["pyo3/extension-module"]
+include = [{ path = "python/khet/ui/static/*", format = ["sdist", "wheel"] }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

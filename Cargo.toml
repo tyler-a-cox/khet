@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = ["crates/khet-core", "crates/khet-py"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+# Verified building and passing the full suite on 1.75.  Nothing here needs
+# anything newer: `OnceLock` landed in 1.70, and the lookup tables are built
+# with plain `const fn` (`while` loops, no `&mut` in const context).
+rust-version = "1.75"
+license = "MIT"
+authors = ["Tyler Cox <tyler.a.cox@berkeley.edu>"]
+repository = "https://github.com/tyler-a-cox/khet"
+
+# The spike is deliberately dependency-free: `cargo run --release` works
+# offline and compiles in a couple of seconds, so the benchmark is trivial to
+# reproduce.  PyO3 arrives in phase 2 as a separate `crates/khet-py` member so
+# that the core crate stays buildable and testable without a Python toolchain.
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = "thin"
+
+# Tests run perft to depth 3 and a depth-5 search, which is unbearable in an
+# unoptimised build - so `cargo test` optimises too, and there is no reason to
+# reach for `--release` just to get a usable test suite.
+[profile.test]
+opt-level = 3

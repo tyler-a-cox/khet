@@ -1,0 +1,16 @@
+/target
+**/*.rs.bk
+*.pdb
+bench_rust.json
+bench_python.json
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# maturin drops the built extension in beside the Python sources
+python/khet/*.so
+python/khet/*.pyd
+/dist
+/wheels
+*.egg-info/

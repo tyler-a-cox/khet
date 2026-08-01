@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- viewport-fit=cover lets the safe-area insets below report real values, which
+     is what keeps the board clear of the notch when the phone is turned sideways.
+     initial-scale=1 with no maximum-scale: pinch-zoom stays available, because on
+     a 10-column board scaled to a phone the squares are small enough that some
+     people will want it. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12161c">
+<title>Khet</title>
+<style>
+  :root {
+    --bg: #12161c;
+    --panel: #1b212a;
+    --line: #2c3542;
+    --ink: #dfe6ee;
+    --dim: #8794a4;
+    --board: #202834;
+    --cell: #26303d;
+    --red: #d4483b;
+    --red-dark: #8f2a20;
+    --silver: #c9d2da;
+    --silver-dark: #78848f;
+    --mirror: #7fe7ff;
+    --accent: #f0c419;
+  }
+  * { box-sizing: border-box; }
+  /* Safari inflates text in landscape without this, which would push the panel
+     around independently of the board. */
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    padding-left: max(24px, env(safe-area-inset-left));
+    padding-right: max(24px, env(safe-area-inset-right));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  h1 { font-size: 20px; margin: 0 0 2px; letter-spacing: .18em; text-transform: uppercase; }
+  .sub { color: var(--dim); font-size: 12px; margin-bottom: 18px; }
+  /* 684 board + 2x10 padding + 2x1 border.  Fixed on desktop so nothing moves,
+     but `max-width` lets it shrink to the viewport on a phone; the SVG has no
+     width/height attributes, so it scales from its viewBox to whatever this
+     ends up being. */
+  #board-wrap {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 10px;
+    width: 706px; max-width: 100%;
+  }
+  svg { display: block; touch-action: manipulation; }
+  #board { width: 100%; height: auto; }
+  .panel {
+    width: 268px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 16px;
+  }
+  .turn {
+    display: flex; align-items: center; gap: 9px; font-weight: 600;
+    padding: 10px 12px; border-radius: 8px; background: #232c38; margin-bottom: 14px;
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .dot.red { background: var(--red); }
+  .dot.silver { background: var(--silver); }
+  .spin {
+    width: 12px; height: 12px; flex: none; border-radius: 50%;
+    border: 2px solid var(--line); border-top-color: var(--accent);
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .stats { font-size: 12px; color: var(--dim); margin-bottom: 14px; }
+  .stats b { color: var(--ink); font-weight: 600; }
+  .stats .pv { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+  .row { display: flex; gap: 8px; margin-bottom: 8px; }
+  button {
+    flex: 1; padding: 8px 10px; border-radius: 7px; border: 1px solid var(--line);
+    background: #232c38; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer;
+  }
+  button:disabled { opacity: .4; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #17202b; font-weight: 600; }
+  /* Hover only where there is a pointer that can hover.  On a touchscreen these
+     rules latch after a tap and the button stays lit until you tap elsewhere. */
+  @media (hover: hover) {
+    button:hover:not(:disabled) { background: #2c3745; border-color: #3d4959; }
+    button.primary:hover:not(:disabled) { background: #ffd534; }
+  }
+  label.field { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--dim); margin-bottom: 8px; }
+  select, input[type=number] {
+    background: #232c38; color: var(--ink); border: 1px solid var(--line);
+    border-radius: 6px; padding: 5px 7px; font: inherit; font-size: 12px; width: 108px;
+  }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+  .moves {
+    max-height: 190px; overflow-y: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; color: var(--dim);
+  }
+  .moves div { display: flex; gap: 8px; padding: 1px 0; }
+  .moves .n { color: #5d6a7b; width: 26px; text-align: right; flex: none; }
+  .moves .m { width: 62px; }
+  .moves .cap { color: var(--accent); }
+  .banner {
+    padding: 10px 12px; border-radius: 8px; font-weight: 600; margin-bottom: 14px;
+    background: #2a3448; border: 1px solid #3d4d68;
+  }
+  .banner.win { background: #1f3a2a; border-color: #2f6b45; color: #8fe0ac; }
+  .banner.loss { background: #3a2222; border-color: #6b3030; color: #f0a3a3; }
+  .err { color: #f0a3a3; font-size: 12px; min-height: 17px; margin-top: 6px; }
+  .help { font-size: 11px; color: #64707f; margin-top: 12px; line-height: 1.6; }
+  .sq { cursor: default; }
+  .sq.pick { cursor: pointer; }
+  .rotbtn { cursor: pointer; }
+  @media (hover: hover) {
+    .rotbtn:hover circle.face { fill: #3c4a5c; }
+  }
+
+  /* Which of the two help texts applies: keyboard shortcuts only exist if there
+     is a keyboard. */
+  .touch-only { display: none; }
+  @media (hover: none) {
+    .mouse-only { display: none; }
+    .touch-only { display: inline; }
+  }
+
+  /* ------------------------------------------------------------------ phone */
+  /* Two breakpoints. The first is where the board and the 268px sidebar stop
+     fitting side by side - 706 + 24 gap + 268 + 48 padding = 1046, rounded up
+     so the panel has already widened by the time flex-wrap drops it below the
+     board, rather than sitting there as a narrow column for a few pixels. */
+  @media (max-width: 1060px) {
+    .panel { width: 706px; max-width: 100%; }
+  }
+  /* The second is the phone proper: tighter padding, thumb-sized controls. */
+  @media (max-width: 760px) {
+    body {
+      padding: 12px;
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      gap: 12px;
+    }
+    #board-wrap { padding: 6px; }
+    h1 { font-size: 16px; }
+    .sub { font-size: 11px; margin-bottom: 12px; }
+    .panel { padding: 14px; }
+    button { padding: 13px 10px; font-size: 15px; }
+    label.field { font-size: 13px; margin-bottom: 12px; }
+    /* 16px is not a style choice: iOS Safari zooms the whole page in when you
+       focus a control whose text is smaller than that, and never zooms back
+       out, which leaves the board cropped for the rest of the game. */
+    select, input[type=number] { font-size: 16px; padding: 8px; width: 150px; }
+    .moves { max-height: 132px; }
+    .help { font-size: 12px; }
+  }
+
+  /* Turned sideways the board would be wider than the screen is tall, so cap it
+     on height instead and let the width follow the 684:560 aspect ratio.
+     `dvh` tracks Safari's collapsing toolbar; `vh` is the fallback for iOS
+     older than 15.4. */
+  @media (orientation: landscape) and (max-height: 620px) {
+    #board-wrap {
+      max-width: calc((100vh - 30px) * 1.221 + 22px);
+      max-width: calc((100dvh - 30px) * 1.221 + 22px);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="board-wrap">
+  <!-- No width/height attributes: the viewBox plus `width: 100%; height: auto`
+       in CSS is what makes this scale to the phone instead of overflowing. -->
+  <svg id="board" viewBox="0 0 684 560">
+    <defs>
+      <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="3.2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <radialGradient id="burst">
+        <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+        <stop offset="45%" stop-color="#ffd534" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#ff5a3c" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <g id="layer-cells"></g>
+    <g id="layer-marks"></g>
+    <g id="layer-pieces"></g>
+    <g id="layer-beam"></g>
+    <g id="layer-ui"></g>
+    <g id="layer-labels"></g>
+  </svg>
+</div>
+
+<div class="panel">
+  <h1>Khet</h1>
+  <div class="sub">alpha&#8211;beta &middot; evaluate_basic</div>
+
+  <div id="banner"></div>
+  <div class="turn" id="turn"></div>
+  <div class="stats" id="stats"></div>
+
+  <div class="row">
+    <button id="undo">Undo</button>
+    <button id="flip">Flip</button>
+  </div>
+  <div class="err" id="err"></div>
+
+  <hr>
+
+  <label class="field">You play
+    <select id="color">
+      <option value="silver">Silver (moves first)</option>
+      <option value="red">Red</option>
+    </select>
+  </label>
+  <label class="field">Bot seconds/move
+    <input id="secs" type="number" min="0.1" max="60" step="0.5" value="2">
+  </label>
+  <div class="row"><button id="new" class="primary">New game</button></div>
+
+  <hr>
+  <div class="moves" id="moves"></div>
+
+  <div class="help">
+    <span class="mouse-only">Click</span><span class="touch-only">Tap</span>
+    one of your pieces, then a highlighted square to move.
+    Hollow rings are scarab swaps. Use the curved arrows
+    <span class="mouse-only">&#8211; or <b>Q</b>&#8202;/&#8202;<b>E</b> &#8211;</span>
+    to rotate.
+    <span class="mouse-only"><b>Esc</b> deselects.</span>
+    <span class="touch-only">Tap the piece again to deselect. Turn the phone
+    sideways for a bigger board.</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const CELL = 62, BX = 30, BY = 30, ROWS = 8, COLS = 10;
+const RED = 0, SILVER = 1;
+const PYRAMID = 1, SCARAB = 2, ANUBIS = 3, PHARAOH = 4, SPHINX = 5;
+const MOVE = 0, SWAP = 1, ROT_CW = 2, ROT_CCW = 3;
+
+const S = { state: null, sel: null, busy: false, flip: false, animToken: 0 };
+
+const $ = id => document.getElementById(id);
+const L = {
+  cells: $("layer-cells"), marks: $("layer-marks"), pieces: $("layer-pieces"),
+  beam: $("layer-beam"), ui: $("layer-ui"), labels: $("layer-labels"),
+};
+
+/* ---------------------------------------------------------------- helpers */
+
+const ptype = c => c >> 3;
+const pcolor = c => (c >> 2) & 1;
+const porient = c => c & 3;
+
+function el(name, attrs, parent) {
+  const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+  for (const k in attrs) node.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(node);
+  return node;
+}
+
+function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+
+/* ------------------------------------------------------------- animation */
+
+/* One knob for the whole show.  Raise it to slow every animation down in
+   proportion, lower it to speed them up; 1 is the tuned default. */
+const SPEED = 1;
+
+const beats = base => Math.round(base * SPEED);
+
+const T = {
+  slide:  beats(300),   /* a piece travelling to its new square             */
+  settle: beats(160),   /* the pause after it lands, before the shot        */
+  beam:   beats(400),   /* the laser drawing itself along its route         */
+  burst:  beats(260),   /* the flash where a piece is destroyed             */
+  hold:   beats(850),   /* how long the finished beam stays on screen       */
+  fade:   beats(420),   /* the beam fading out again                        */
+  think:  beats(450),   /* the beat before the bot's reply lands            */
+};
+
+/* Your own moves are shown a little quicker: you know what you just played,
+   the bot's move is the one that needs time to read. */
+const OWN_MOVE = 0.7;
+
+const wait = delay => new Promise(done => setTimeout(done, delay));
+
+const easeInOut = t =>
+  t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/* Drives `step` with eased 0..1 progress, resolving when it gets to 1.
+ *
+ * The first frame runs synchronously so the starting position is in place
+ * before the browser paints - otherwise the piece flashes at its destination
+ * for one frame and then jumps back to animate, which reads as a stutter.
+ *
+ * Bails out if the animation token moves on.  A new game or an undo can land
+ * while a piece is still sliding, and by then the node being animated has
+ * already been thrown away by render(). */
+function tween(duration, step) {
+  const token = S.animToken;
+  return new Promise(done => {
+    if (duration <= 0) { step(1); done(); return; }
+    const t0 = performance.now();
+    (function frame(now) {
+      if (token !== S.animToken) { done(); return; }
+      const progress = Math.min(1, (now - t0) / duration);
+      step(easeInOut(progress));
+      if (progress < 1) requestAnimationFrame(frame);
+      else done();
+    })(t0);
+  });
+}
+
+/* Board row/col -> screen row/col, honouring the flip. */
+function view(sq) {
+  let r = Math.floor(sq / COLS), c = sq % COLS;
+  if (S.flip) { r = ROWS - 1 - r; c = COLS - 1 - c; }
+  return [r, c];
+}
+function originOf(sq) { const [r, c] = view(sq); return [BX + c * CELL, BY + r * CELL]; }
+function centerOf(sq) { const [x, y] = originOf(sq); return [x + CELL / 2, y + CELL / 2]; }
+
+async function api(path, body) {
+  const opts = body === undefined
+    ? {}
+    : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const res = await fetch(path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || ("HTTP " + res.status));
+  return data;
+}
+
+/* ---------------------------------------------------------------- pieces */
+
+const SKIN = {
+  0: { body: "#d4483b", edge: "#8f2a20", trim: "#f08a7d" },
+  1: { body: "#c9d2da", edge: "#78848f", trim: "#ffffff" },
+};
+
+const PAD = 8, LO = PAD, HI = CELL - PAD;          /* inset square corners */
+const CORNER = { NW: [LO, LO], NE: [HI, LO], SE: [HI, HI], SW: [LO, HI] };
+
+/* The solid half of a pyramid, indexed by orientation.
+ *
+ * The mirror is the hypotenuse and the beam can only reach it through the two
+ * open faces, so the body sits *behind* the glass - in the half opposite the
+ * corner the orientation names.  A pyramid at o=0 reflects north- and
+ * east-bound shots (pieces._PYRAMID_FACES), which means those two faces have
+ * to be clear, so its body is the south-west half.
+ *
+ * Drawing the body on the reflecting side instead - which is what this table
+ * used to do - renders every pyramid rotated 180 degrees, and the picture then
+ * disagrees with a laser that is behaving perfectly correctly.
+ */
+const PYRAMID_BODY = [
+  ["NW", "SW", "SE"],   /* o=0, mirror faces NE */
+  ["NW", "NE", "SW"],   /* o=1, mirror faces SE */
+  ["NW", "NE", "SE"],   /* o=2, mirror faces SW */
+  ["NE", "SE", "SW"],   /* o=3, mirror faces NW */
+];
+
+/* The mirror diagonal: "\" for even orientations, "/" for odd, matching
+   pieces._mirror_for.  Also the diagonal a scarab's double-sided mirror lies
+   on, since a scarab of orientation o uses a pyramid's diagonal. */
+const MIRROR = [["NW", "SE"], ["NE", "SW"], ["NW", "SE"], ["NE", "SW"]];
+
+/* Corners of the face a direction names: FACE[UP] is the north edge. */
+const FACE = [["NW", "NE"], ["NE", "SE"], ["SE", "SW"], ["SW", "NW"]];
+
+const at = name => CORNER[name];
+const poly = names => names.map(n => at(n).join(",")).join(" ");
+
+/* The orientation to *draw*, which is not the orientation the piece has.
+ *
+ * Flipping the board is a 180 degree rotation of the whole position, so every
+ * glyph has to turn with it: a pyramid whose body is the south-west half is
+ * south-west on the board but north-east on an upside-down screen.  Rotating
+ * the squares without rotating the pieces leaves each one drawn 180 degrees
+ * out - the same symptom as getting the body table backwards, but only for
+ * whichever player flipped the board.
+ *
+ * Orientation + 2 is that half turn, and it is the same transform the
+ * starting-position symmetry uses in board.py.
+ */
+const displayOrientation = (code, flipped) =>
+  flipped ? (porient(code) + 2) & 3 : porient(code);
+
+function drawPiece(g, code, flipped) {
+  const t = ptype(code), skin = SKIN[pcolor(code)];
+  const o = displayOrientation(code, flipped);
+  const base = { fill: skin.body, stroke: skin.edge, "stroke-width": 1.5, "stroke-linejoin": "round" };
+  const span = (names, attrs) => el("line", Object.assign({
+    x1: at(names[0])[0], y1: at(names[0])[1],
+    x2: at(names[1])[0], y2: at(names[1])[1],
+    "stroke-linecap": "round",
+  }, attrs), g);
+
+  if (t === PYRAMID) {
+    el("polygon", Object.assign({ points: poly(PYRAMID_BODY[o]) }, base), g);
+    span(MIRROR[o], { stroke: "var(--mirror)", "stroke-width": 3.5 });
+  } else if (t === SCARAB) {
+    /* No body to draw: a scarab is a bare double-sided mirror that reflects
+       from all four directions and can never be destroyed. */
+    span(MIRROR[o], { stroke: skin.body, "stroke-width": 11, opacity: .95 });
+    span(MIRROR[o], { stroke: "var(--mirror)", "stroke-width": 4 });
+  } else if (t === ANUBIS) {
+    el("rect", Object.assign({ x: LO, y: LO, width: HI - LO, height: HI - LO, rx: 4 }, base), g);
+    /* The armoured face absorbs a head-on shot; mark it heavily. */
+    span(FACE[o], { stroke: skin.edge, "stroke-width": 7 });
+    el("circle", { cx: CELL / 2, cy: CELL / 2, r: 4.5, fill: skin.edge, opacity: .55 }, g);
+  } else if (t === PHARAOH) {
+    el("circle", { cx: CELL / 2, cy: CELL / 2, r: (HI - LO) / 2,
+      fill: skin.body, stroke: "var(--accent)", "stroke-width": 2.5 }, g);
+    const m = CELL / 2;
+    el("path", {
+      d: `M ${m} ${m - 9} v 18 M ${m - 7} ${m + 1} h 14`,
+      stroke: skin.edge, "stroke-width": 3, "stroke-linecap": "round", fill: "none",
+    }, g);
+  } else if (t === SPHINX) {
+    el("rect", Object.assign({ x: LO + 3, y: LO + 3, width: HI - LO - 6, height: HI - LO - 6, rx: 3 }, base), g);
+    /* Emitter points the way the laser fires. */
+    const m = CELL / 2, d = 15;
+    const tip = [[m, LO - 1], [HI + 1, m], [m, HI + 1], [LO - 1, m]][o];
+    const wing = o % 2 === 0
+      ? [[m - d, tip[1] + (o === 0 ? d : -d)], [m + d, tip[1] + (o === 0 ? d : -d)]]
+      : [[tip[0] + (o === 1 ? -d : d), m - d], [tip[0] + (o === 1 ? -d : d), m + d]];
+    el("polygon", {
+      points: [tip, wing[0], wing[1]].map(p => p.join(",")).join(" "),
+      fill: "var(--accent)", stroke: skin.edge, "stroke-width": 1.2,
+    }, g);
+  }
+}
+
+/* ---------------------------------------------------------------- render */
+
+function movesByFrom() {
+  const map = new Map();
+  if (!S.state) return map;
+  for (const m of S.state.legal_moves) {
+    let entry = map.get(m.from);
+    if (!entry) { entry = { steps: new Map(), swaps: new Map(), cw: null, ccw: null }; map.set(m.from, entry); }
+    if (m.kind === MOVE) entry.steps.set(m.to, m.move);
+    else if (m.kind === SWAP) entry.swaps.set(m.to, m.move);
+    else if (m.kind === ROT_CW) entry.cw = m.move;
+    else entry.ccw = m.move;
+  }
+  return map;
+}
+
+function render() {
+  const st = S.state;
+  if (!st) return;
+  const legal = movesByFrom();
+  const sel = S.sel !== null ? legal.get(S.sel) : null;
+
+  clear(L.cells); clear(L.marks); clear(L.pieces); clear(L.ui); clear(L.labels);
+
+  /* board backdrop */
+  el("rect", { x: BX - 6, y: BY - 6, width: COLS * CELL + 12, height: ROWS * CELL + 12,
+    rx: 8, fill: "var(--board)", stroke: "var(--line)" }, L.cells);
+
+  for (let sq = 0; sq < ROWS * COLS; sq++) {
+    const [x, y] = originOf(sq);
+    const owner = st.restricted[sq];
+    const cell = el("rect", {
+      x: x + 1, y: y + 1, width: CELL - 2, height: CELL - 2, rx: 4,
+      fill: "var(--cell)", stroke: "#1a212b",
+    }, L.cells);
+    if (owner !== -1) {
+      el("rect", {
+        x: x + 1, y: y + 1, width: CELL - 2, height: CELL - 2, rx: 4,
+        fill: owner === RED ? "var(--red)" : "var(--silver)", opacity: .085,
+      }, L.cells);
+    }
+    cell.setAttribute("class", "sq");
+
+    /* last-move trail */
+    const last = st.last;
+    if (last && (sq === last.from || sq === last.to)) {
+      el("rect", { x: x + 1, y: y + 1, width: CELL - 2, height: CELL - 2, rx: 4,
+        fill: "var(--accent)", opacity: .13 }, L.marks);
+    }
+  }
+
+  /* pieces */
+  for (let sq = 0; sq < ROWS * COLS; sq++) {
+    const code = st.squares[sq];
+    if (!code) continue;
+    const [x, y] = originOf(sq);
+    /* Tagged with the square so animateMove() can pick the pieces a move
+       touched back out of the layer it just redrew. */
+    const g = el("g", { transform: `translate(${x},${y})`, "data-sq": sq }, L.pieces);
+    drawPiece(g, code, S.flip);
+  }
+
+  /* selection + destinations */
+  if (sel) {
+    const [x, y] = originOf(S.sel);
+    el("rect", { x: x + 1.5, y: y + 1.5, width: CELL - 3, height: CELL - 3, rx: 4,
+      fill: "none", stroke: "var(--accent)", "stroke-width": 3 }, L.ui);
+    for (const to of sel.steps.keys()) {
+      const [cx, cy] = centerOf(to);
+      el("circle", { cx, cy, r: 9, fill: "var(--accent)", opacity: .8 }, L.ui);
+    }
+    for (const to of sel.swaps.keys()) {
+      const [cx, cy] = centerOf(to);
+      el("circle", { cx, cy, r: 15, fill: "none", stroke: "var(--accent)",
+        "stroke-width": 3.5, opacity: .9 }, L.ui);
+    }
+  }
+
+  /* Click targets go above the highlights, so the rotate buttons have to be
+     drawn after them or the transparent hit rects would swallow their clicks. */
+  const clickable = st.your_turn && !S.busy;
+  for (let sq = 0; sq < ROWS * COLS; sq++) {
+    const [x, y] = originOf(sq);
+    const hit = el("rect", { x, y, width: CELL, height: CELL, fill: "transparent" }, L.ui);
+    const isDest = sel && (sel.steps.has(sq) || sel.swaps.has(sq));
+    const isMine = clickable && legal.has(sq);
+    hit.setAttribute("class", "sq" + ((isDest || isMine) ? " pick" : ""));
+    if (clickable) hit.addEventListener("click", () => onSquare(sq, legal));
+  }
+  if (sel) drawRotateButtons(S.sel, sel);
+
+  /* file / rank labels */
+  for (let c = 0; c < COLS; c++) {
+    const file = "abcdefghij"[S.flip ? COLS - 1 - c : c];
+    el("text", { x: BX + c * CELL + CELL / 2, y: BY + ROWS * CELL + 22,
+      "text-anchor": "middle", fill: "#5d6a7b", "font-size": 11 }, L.labels).textContent = file;
+  }
+  for (let r = 0; r < ROWS; r++) {
+    const rank = (S.flip ? ROWS - r : r + 1);
+    el("text", { x: BX - 12, y: BY + r * CELL + CELL / 2 + 4,
+      "text-anchor": "middle", fill: "#5d6a7b", "font-size": 11 }, L.labels).textContent = rank;
+  }
+
+  renderPanel();
+}
+
+/* A circular arrow showing which way the piece will turn.
+ *
+ * SVG's y axis points down, so a *rising* angle sweeps clockwise on screen -
+ * that is also what the arc sweep flag means, which keeps the two consistent.
+ * The head goes on the end the arc travels towards.  The first version put a
+ * bead on the start point instead, and an arrow read from head to tail points
+ * the wrong way, so both buttons advertised the opposite of the move they
+ * actually played.
+ */
+function rotationIcon(g, cx, cy, clockwise, radius = 7.5) {
+  const scale = radius / 7.5;
+  const span = 280 * Math.PI / 180;
+  const start = (clockwise ? 60 : 120) * Math.PI / 180;
+  const end = clockwise ? start + span : start - span;
+  const on = angle => [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
+  const [x0, y0] = on(start);
+  const [x1, y1] = on(end);
+
+  el("path", {
+    d: `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${radius} ${radius} 0 1 ` +
+       `${clockwise ? 1 : 0} ${x1.toFixed(2)} ${y1.toFixed(2)}`,
+    fill: "none", stroke: "var(--accent)", "stroke-width": 2.2 * scale,
+    "stroke-linecap": "round",
+  }, g);
+
+  // Tangent at the end of the sweep, which is where the head has to point.
+  const tx = clockwise ? -Math.sin(end) : Math.sin(end);
+  const ty = clockwise ? Math.cos(end) : -Math.cos(end);
+  const head = [[x1 + tx * 5.5 * scale, y1 + ty * 5.5 * scale],
+                [x1 - ty * 3.4 * scale, y1 + tx * 3.4 * scale],
+                [x1 + ty * 3.4 * scale, y1 - tx * 3.4 * scale]];
+  el("polygon", {
+    points: head.map(p => p.map(v => v.toFixed(2)).join(",")).join(" "),
+    fill: "var(--accent)",
+  }, g);
+}
+
+/* Rotation is not an optional flourish in Khet - the sphinx can only be aimed by
+ * rotating, so a board you cannot rotate on is a board you cannot play on. At
+ * the desktop size these buttons are 28 units across, which is 28 CSS px; scaled
+ * down to fit a phone that becomes about 17, well under the ~44 a fingertip
+ * needs. So on a coarse pointer they are drawn larger, and given a transparent
+ * hit circle larger still. Everything is in viewBox units, so it scales with the
+ * board rather than being pinned to one screen size.
+ */
+const COARSE = window.matchMedia("(pointer: coarse)").matches;
+const ROT = COARSE
+  ? { radius: 19, icon: 10, spread: 25, gap: 21 }
+  : { radius: 14, icon: 7.5, spread: 19, gap: 15 };
+
+function drawRotateButtons(sq, entry) {
+  const [r] = view(sq);
+  const [x, y] = originOf(sq);
+  const cy = r > 0 ? y - ROT.gap : y + CELL + ROT.gap;
+  const specs = [
+    { move: entry.ccw, cx: x + CELL / 2 - ROT.spread, clockwise: false },
+    { move: entry.cw, cx: x + CELL / 2 + ROT.spread, clockwise: true },
+  ];
+  for (const spec of specs) {
+    if (!spec.move) continue;
+    const g = el("g", { class: "rotbtn" }, L.ui);
+    // Transparent, and first so the visible face paints over it. `transparent`
+    // rather than `none`: a fill of `none` would not receive the tap.
+    el("circle", { cx: spec.cx, cy, r: ROT.radius + 7, fill: "transparent" }, g);
+    el("circle", { class: "face", cx: spec.cx, cy, r: ROT.radius, fill: "#2c3745",
+      stroke: "var(--accent)", "stroke-width": 1.5 }, g);
+    rotationIcon(g, spec.cx, cy, spec.clockwise, ROT.icon);
+    g.addEventListener("click", ev => { ev.stopPropagation(); play(spec.move); });
+  }
+}
+
+/* ---------------------------------------------------------------- panel */
+
+function renderPanel() {
+  const st = S.state;
+  const names = st.color_names;
+
+  const turn = $("turn");
+  clear(turn);
+  if (st.winner !== null) {
+    turn.innerHTML = `<span class="dot ${names[st.winner]}"></span>${names[st.winner]} wins`;
+  } else if (S.busy && !st.your_turn) {
+    turn.innerHTML = `<span class="spin"></span>${names[st.bot_color]} is thinking&#8230;`;
+  } else {
+    const side = st.side_to_move;
+    turn.innerHTML = `<span class="dot ${names[side]}"></span>` +
+      (st.your_turn ? "Your move" : names[side] + " to move");
+  }
+
+  const banner = $("banner");
+  if (st.winner === null) { banner.className = ""; banner.textContent = ""; }
+  else {
+    const won = st.winner === st.human_color;
+    banner.className = "banner " + (won ? "win" : "loss");
+    banner.textContent = won ? "You win — pharaoh destroyed." : "You lose — your pharaoh fell.";
+  }
+
+  const t = st.thinking;
+  $("stats").innerHTML = t
+    ? `bot eval <b>${t.mate ? (t.score > 0 ? "mate" : "mated") : (t.score > 0 ? "+" : "") + t.score}</b>
+       &middot; depth <b>${t.depth}</b> &middot; <b>${t.nodes.toLocaleString()}</b> nodes
+       &middot; ${t.elapsed}s<br><span class="pv">${t.pv.join(" ")}</span>`
+    : "";
+
+  const moves = $("moves");
+  clear(moves);
+  const list = st.moves;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const row = document.createElement("div");
+    row.innerHTML = `<span class="n">${i + 1}.</span>` +
+      `<span class="m" style="color:${i % 2 === 0 ? "var(--silver)" : "var(--red)"}">${list[i]}</span>`;
+    moves.appendChild(row);
+  }
+
+  $("undo").disabled = S.busy || !st.can_undo;
+  $("flip").disabled = S.busy;
+  $("new").disabled = S.busy;
+}
+
+/* ---------------------------------------------------------------- moves */
+
+const pieceAt = sq => L.pieces.querySelector(`[data-sq="${sq}"]`);
+
+/* Put the piece the beam is about to destroy back on the board.
+ *
+ * render() draws the position the move produced, and in that position the
+ * casualty is already gone - so without a stand-in it blinks out of existence
+ * a full beat before the shot that destroys it has even been fired. */
+function drawGhost(captured) {
+  const [x, y] = originOf(captured.square);
+  const g = el("g", { transform: `translate(${x},${y})` }, L.pieces);
+  drawPiece(g, captured.code, S.flip);
+  return g;
+}
+
+/* Walk the pieces a move touched from where they were to where they are.
+ *
+ * render() has already drawn the finished position, so this puts each moved
+ * piece back on its old square for the first frame and eases it home.  A
+ * rotation has nowhere to travel, so it turns instead: the glyph is drawn in
+ * its final orientation, and starting it a quarter turn the other way plays
+ * back the turn the piece actually made.
+ */
+function animateMove(last, ghost) {
+  const duration = Math.round(T.slide * (last.by_bot ? 1 : OWN_MOVE));
+  /* A destroyed piece is not in the layer under its own square any more, so
+     its stand-in has to answer for it - a piece can move and then be shot on
+     the very same turn, and it still has to be seen making the move. */
+  const nodeOn = sq =>
+    pieceAt(sq) || (ghost && last.captured.square === sq ? ghost : null);
+
+  if (last.kind === ROT_CW || last.kind === ROT_CCW) {
+    const node = nodeOn(last.to);
+    if (!node) return Promise.resolve();
+    const [x, y] = originOf(last.to);
+    const swing = last.kind === ROT_CW ? -90 : 90;
+    return tween(duration, t => node.setAttribute("transform",
+      `translate(${x},${y}) ` +
+      `rotate(${(swing * (1 - t)).toFixed(2)},${CELL / 2},${CELL / 2})`));
+  }
+
+  /* An ordinary move empties the square it came from; a scarab swap drags the
+     other piece back along the same line, so both ends need walking. */
+  const trips = [[last.to, last.from]];
+  if (last.kind === SWAP) trips.push([last.from, last.to]);
+
+  return Promise.all(trips.map(([now, before]) => {
+    const node = nodeOn(now);
+    if (!node) return Promise.resolve();
+    const [x0, y0] = originOf(before);
+    const [x1, y1] = originOf(now);
+    return tween(duration, t => node.setAttribute("transform",
+      `translate(${(x0 + (x1 - x0) * t).toFixed(2)},` +
+      `${(y0 + (y1 - y0) * t).toFixed(2)})`));
+  }));
+}
+
+/* ---------------------------------------------------------------- beam */
+
+/* The flash where the beam meets a piece, taking the piece with it. */
+function strike(captured, ghost) {
+  const [cx, cy] = centerOf(captured.square);
+  const burst = el("circle", { cx, cy, r: 6, fill: "url(#burst)" }, L.beam);
+  burst.style.transition = `r ${T.burst}ms ease-out, ` +
+    `opacity ${T.fade}ms ease-out ${Math.round(T.burst * .6)}ms`;
+  if (ghost) ghost.style.transition = `opacity ${T.burst}ms ease-out`;
+  requestAnimationFrame(() => {
+    burst.setAttribute("r", 34);
+    burst.style.opacity = 0;
+    if (ghost) ghost.style.opacity = 0;
+  });
+}
+
+/* Fires the shot, and resolves once it has landed.
+ *
+ * The hold and the fade-out deliberately carry on after the returned promise
+ * settles.  Waiting for the glow to clear before handing the board back would
+ * cost more than a second every turn and buy nothing - by then the move has
+ * already been read. */
+function animateBeam(last, ghost) {
+  const token = S.animToken;
+  /* A fade from the previous shot may still be in flight, and it leaves the
+     layer part-way transparent; this one starts at full strength. */
+  L.beam.style.transition = "";
+  L.beam.style.opacity = 1;
+  clear(L.beam);
+  if (!last || !last.beam || !last.beam.length) {
+    if (ghost) ghost.remove();
+    return Promise.resolve();
+  }
+
+  const start = centerOf(S.state.sphinxes[last.color]);
+  const pts = [start].concat(last.beam.map(step => centerOf(step.square)));
+  const d = "M " + pts.map(p => p.join(" ")).join(" L ");
+
+  const halo = el("path", { d, fill: "none", stroke: "#ff3b30", "stroke-width": 9,
+    "stroke-linecap": "round", "stroke-linejoin": "round", opacity: .22,
+    filter: "url(#glow)" }, L.beam);
+  const beam = el("path", { d, fill: "none", stroke: "#ff5a45", "stroke-width": 3,
+    "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#glow)" }, L.beam);
+
+  const len = beam.getTotalLength();
+  for (const node of [beam, halo]) {
+    node.style.strokeDasharray = len;
+    node.style.strokeDashoffset = len;
+    node.style.transition = `stroke-dashoffset ${T.beam}ms linear`;
+  }
+  requestAnimationFrame(() => {
+    beam.style.strokeDashoffset = 0;
+    halo.style.strokeDashoffset = 0;
+  });
+
+  const landed = wait(T.beam).then(() => {
+    if (token !== S.animToken) return;
+    if (last.captured) strike(last.captured, ghost);
+  });
+
+  landed.then(() => wait(T.hold)).then(() => {
+    if (token !== S.animToken) return;
+    if (ghost) ghost.remove();
+    L.beam.style.transition = `opacity ${T.fade}ms ease-out`;
+    L.beam.style.opacity = 0;
+    return wait(T.fade + 20).then(() => {
+      if (token !== S.animToken) return;
+      clear(L.beam);
+      L.beam.style.transition = "";
+      L.beam.style.opacity = 1;
+    });
+  });
+
+  return landed.then(() => wait(Math.round(T.burst / 2)));
+}
+
+/* ---------------------------------------------------------------- flow */
+
+/* Show a position, optionally playing the move that produced it.
+ *
+ * The order is the order the rules put things in: the piece moves, the board
+ * settles, and only then does the sphinx fire.  Doing the two at once - which
+ * is what dropping the piece straight onto its square amounted to - makes the
+ * move itself almost impossible to see, because the beam arrives to explain a
+ * change that already happened. */
+async function setState(st, animate) {
+  S.state = st;
+  S.sel = null;
+  render();
+  if (!animate || !st.last) return;
+
+  const last = st.last;
+  const ghost = last.captured ? drawGhost(last.captured) : null;
+  await animateMove(last, ghost);
+  await wait(Math.round(T.settle * (last.by_bot ? 1 : OWN_MOVE)));
+  await animateBeam(last, ghost);
+}
+
+function fail(error) {
+  $("err").textContent = error.message || String(error);
+  setTimeout(() => { $("err").textContent = ""; }, 3500);
+}
+
+function onSquare(sq, legal) {
+  const entry = S.sel !== null ? legal.get(S.sel) : null;
+  if (entry) {
+    const move = entry.steps.get(sq) || entry.swaps.get(sq);
+    if (move) { play(move); return; }
+  }
+  if (legal.has(sq) && sq !== S.sel) { S.sel = sq; render(); return; }
+  S.sel = null;
+  render();
+}
+
+async function play(move) {
+  if (S.busy) return;
+  S.busy = true;
+  try {
+    await setState(await api("/api/move", { move }), true);
+    await botTurn();
+  } catch (error) {
+    fail(error);
+  } finally {
+    S.busy = false;
+    render();
+  }
+}
+
+async function botTurn() {
+  while (S.state.winner === null && !S.state.your_turn) {
+    render();                                   /* show the thinking spinner */
+    /* A beat before the reply lands, so it reads as the bot making a move
+       rather than the board changing under you.  It also gives the beam from
+       your own move room to clear on the rare turn the search returns almost
+       at once. */
+    await wait(T.think);
+    await setState(await api("/api/bot", {}), true);
+  }
+}
+
+async function run(fn) {
+  if (S.busy) return;
+  S.busy = true;
+  try { await fn(); } catch (error) { fail(error); }
+  finally { S.busy = false; render(); }
+}
+
+/* ---------------------------------------------------------------- wiring */
+
+$("new").addEventListener("click", () => run(async () => {
+  const color = $("color").value;
+  const st = await api("/api/new", {
+    human_color: color,
+    time_limit: parseFloat($("secs").value) || 2,
+  });
+  S.flip = st.human_color === RED;
+  S.animToken++;
+  clear(L.beam);
+  await setState(st, false);
+  await botTurn();
+}));
+
+$("undo").addEventListener("click", () => run(async () => {
+  S.animToken++;
+  clear(L.beam);
+  await setState(await api("/api/undo", {}), false);
+}));
+
+/* Flipping moves every square, so anything mid-flight is animating towards
+   coordinates that no longer mean what they did when it started. */
+$("flip").addEventListener("click", () => {
+  S.flip = !S.flip;
+  S.animToken++;
+  clear(L.beam);
+  render();
+});
+
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") { S.sel = null; render(); return; }
+  if (S.sel === null || S.busy) return;
+  const entry = movesByFrom().get(S.sel);
+  if (!entry) return;
+  if (ev.key === "q" || ev.key === "Q") { if (entry.ccw) play(entry.ccw); }
+  if (ev.key === "e" || ev.key === "E") { if (entry.cw) play(entry.cw); }
+});
+
+run(async () => {
+  const st = await api("/api/state");
+  S.flip = st.human_color === RED;
+  $("color").value = st.color_names[st.human_color];
+  $("secs").value = st.time_limit;
+  await setState(st, false);
+  await botTurn();
+});
+</script>
+</body>
+</html>

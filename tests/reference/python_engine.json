@@ -1,0 +1,163 @@
+{
+  "search": {
+    "pruned": {
+      "reference": false,
+      "rows": [
+        {
+          "depth": 1,
+          "nodes": 94,
+          "score": 3,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6"
+          ],
+          "re_searches": 15
+        },
+        {
+          "depth": 2,
+          "nodes": 1900,
+          "score": 0,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "c2-b3"
+          ],
+          "re_searches": 80
+        },
+        {
+          "depth": 3,
+          "nodes": 11675,
+          "score": 6,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "h5-g5",
+            "h6-h5"
+          ],
+          "re_searches": 86
+        },
+        {
+          "depth": 4,
+          "nodes": 36066,
+          "score": 3,
+          "best": "c8-d7",
+          "pv": [
+            "c8-d7",
+            "c2-b3",
+            "d7-e7",
+            "h1-g2"
+          ],
+          "re_searches": 112
+        },
+        {
+          "depth": 5,
+          "nodes": 274683,
+          "score": 6,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "h5-g5",
+            "h6-h5",
+            "c2-b3",
+            "c8-b7"
+          ],
+          "re_searches": 252
+        },
+        {
+          "depth": 6,
+          "nodes": 747513,
+          "score": 3,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "c2-c3",
+            "c4-d4",
+            "a4-a3",
+            "f5-g4"
+          ],
+          "re_searches": 413
+        }
+      ]
+    },
+    "reference": {
+      "reference": true,
+      "rows": [
+        {
+          "depth": 1,
+          "nodes": 79,
+          "score": 3,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6"
+          ],
+          "re_searches": 0
+        },
+        {
+          "depth": 2,
+          "nodes": 589,
+          "score": 0,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "c2-b3"
+          ],
+          "re_searches": 0
+        },
+        {
+          "depth": 3,
+          "nodes": 10643,
+          "score": 6,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "h5-g5",
+            "h6-h5"
+          ],
+          "re_searches": 0
+        },
+        {
+          "depth": 4,
+          "nodes": 32921,
+          "score": 0,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "c2-c3",
+            "j5-j6",
+            "a4-a3"
+          ],
+          "re_searches": 0
+        },
+        {
+          "depth": 5,
+          "nodes": 538247,
+          "score": 9,
+          "best": "h7-h6",
+          "pv": [
+            "h7-h6",
+            "h5-g5",
+            "c8-d7",
+            "c2-b3",
+            "d7-e7"
+          ],
+          "re_searches": 0
+        }
+      ]
+    }
+  },
+  "recorded_with": "CPython 3.10.12",
+  "perft": [
+    {
+      "depth": 1,
+      "nodes": 79
+    },
+    {
+      "depth": 2,
+      "nodes": 6232
+    },
+    {
+      "depth": 3,
+      "nodes": 488195
+    }
+  ]
+}

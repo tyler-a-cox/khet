@@ -1,0 +1,14 @@
+[package]
+name = "khet-core"
+description = "Khet (laser chess) board, move generation, laser resolution and alpha-beta search."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"
